@@ -5,84 +5,75 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Graph Explorer</title>
+	<link rel="stylesheet" href="/local/static/bulma.css">
+	<script defer src="/local/static/fontawesome.js"></script>
 	<link rel="stylesheet" href="/local/static/style.css">
-	<link rel="stylesheet" href="/local/static/bootstrap-material-design/bootstrap-material-design.min.css">
-	<link rel="stylesheet" href="/local/static/bootstrap-material-design/fonts.css">
+	<script type="text/javascript" src="/local/static/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="/local/static/d3.v4.js"></script>
+	<script type="text/javascript" src="/local/static/vue.js"></script>
 </head>
 <body>
-	<div id="app">
-		<div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-in">
-			<div id="dw-p1" class="bmd-layout-drawer bg-faded light-gray" aria-expanded="true" aria-hidden="false">
-				<div class="controls">
-					<form id="radio-form">
-						<div class="radio">
-							<label>
-								<input type="radio" name="optionsRadios" id="optionsRadios1" value="topBen" v-model="picked">
-								</input>
-								<span class="bmd-radio">
-									<div class="ripple-container"></div>
-								</span>
-								Top bénéficiaires
-							</label>
-						</div>
-						<div class="radio">
-							<label>
-								<input type="radio" name="optionsRadios" id="optionsRadios2" value="topDon" v-model="picked">
-								</input>
-								<span class="bmd-radio">
-									<div class="ripple-container"></div>
-								</span>
-								Top donneurs d'ordre
-							</label>
-						</div>
-					</form>
-					<select id="person-picker" class="custom-select scrollable" v-model="selected">
-						<option value="default" selected>Enquêter sur..</option>
-						<option :value="don.entity" v-if="picked == 'topDon'" v-for="don in topDonneurs">
-							{{ don.prenom_nom }}
-						</option>
-						<option :value="ben.entity" v-if="picked == 'topBen'" v-for="ben in topBeneficiaries">
-							{{ ben.prenom_nom }}
-						</option>
-					</select>
+	<div id=app>
+		<div class="columns">
+			<div id="sidenav" class="column is-one-fifth">
+				<div class="control left-margin">
+					<div>
+						<input type="radio" name="optionsRadios" id="optionsRadio1" value="topBen" v-model="picked">
+						<label for="optionsRadio1" class="radio"> Top bénéficiaires </label>
+					</div>
+					<div>
+						<input type="radio" name="optionsRadios" id="optionsRadio2" value="topDon" v-model="picked">
+						<label for="optionsRadio2" class="radio">Top donneurs</label>
+					</div>
 				</div>
-				<div class="container-fluid information" v-bind:style="{ 'background-color': infoBackgroundColor }" v-if="isNodeHovered">
-					<div>{{ nodeHovered.prenom_nom }} </div>
-					<div> {{ nodeHovered.pays }} </div>
-					<div> {{ nodeHovered.code_postal }} </div>
+				<label class="label left-margin">Enquêter sur:</label>
+				<div class="control left-margin">
+					<div class="select">
+						<select v-model="selected">
+							<option value="default" selected>...</option>
+							<option :value="don.entity" v-if="picked == 'topDon'" v-for="don in topDonneurs">
+								{{ don.prenom_nom }}
+							</option>
+							<option :value="ben.entity" v-if="picked == 'topBen'" v-for="ben in topBeneficiaries">
+								{{ ben.prenom_nom }}
+							</option>
+						</select>
+					</div>
 				</div>
-				<div class="container-fluid information" style="background-color: var(--gray);" v-if="isLinkHovered">
-					<div v-for="transaction in linkHovered.transactions">
-						{{ transaction.valeur_euro + " €"}}
+				<div class="information" v-bind:style="{ 'background-color': infoBackgroundColor }" v-if="isNodeHovered">
+					<div class="left-margin">
+						<div>{{ nodeHovered.prenom_nom }} </div>
+						<div> {{ nodeHovered.pays }} </div>
+						<div> {{ nodeHovered.code_postal }} </div>
+					</div>
+				</div>
+				<div class="container-fluid information" style="background-color: var(--asbestos);" v-if="isLinkHovered">
+					<div class="left-margin">
+						<div v-for="transaction in linkHovered.transactions">
+							{{ transaction.valeur_euro + " €"}}
+						</div>					
 					</div>
 				</div>
 			</div>
-			<main class="bmd-layout-content">
-				<div id="graph-container" class="container-fluid">
-					<div class="loader" class="container-fluid" v-show="isGraphLoading"></div>
-					<svg v-bind:width="width" v-bind:height="height">
-						<defs>
-							<marker id="arrowhead" viewBox="-0 -5 10 10" refX="20" refY="0" orient="auto" markerWidth="3" markerHeight="3" xoverflow="visbile">
-								<path d="M 0,-5 L 10, 0 L 0, 5" fill="var(--grey)" opacity="0.2" stroke="none;"></path>
-							</marker>
-						</defs>
-						<g class="graph">
-							<g class="links"></g>
-							<g class="edgepaths"></g>
-							<g class="edgelabels"></g>
-							<g class="nodes"></g>
-							<g class="nodelabels"></g>
-						</g>
-					</svg>
-				</div>
-			</main>
-		</div>
+			<!-- Add all page content inside this div -->
+			<div id="main" class="column">
+				<svg id="svg">
+					<defs>
+						<marker id="arrowhead" viewBox="-0 -5 10 10" refX="20" refY="0" orient="auto" markerWidth="3" markerHeight="3" xoverflow="visbile">
+							<path d="M 0,-5 L 10, 0 L 0, 5" fill="var(--grey)" opacity="0.2" stroke="none;"></path>
+						</marker>
+					</defs>
+					<g class="graph">
+						<g class="links"></g>
+						<g class="edgepaths"></g>
+						<g class="edgelabels"></g>
+						<g class="nodes"></g>
+						<g class="nodelabels"></g>
+					</g>
+				</svg>
+			</div>	
+		</div> 
 	</div>
-	<script type="text/javascript" src="/local/static/jquery-3.3.1.min.js"></script>
-	<script type="text/javascript" src="/local/static/bootstrap-material-design/popper.min.js"></script>
-	<script type="text/javascript" src="/local/static/bootstrap-material-design/bootstrap-material-design.js"></script>
-	<script type="text/javascript" src="/local/static/d3.v4.js"></script>
-	<script type="text/javascript" src="/local/static/vue.js"></script>
 	<script type="text/javascript" src="/local/static/app.js"></script>
 </body>
 </html>
