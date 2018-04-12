@@ -1,53 +1,73 @@
+/* Declare a color palette based on http://designmodo.github.io/Flat-UI/ */
+html {
+    --turquoise: #1ABC9C;
+    --green-sea: #16A085;
+    --emerald: #2ECC71;
+    --nephritis: #27AE60;
+    --peter-river: #3498DB;
+    --belize-hole: #2980B9;
+    --amethyst: #9B59B6;
+    --wisteria: #8E44AD;
+    --wet-asphalt: #34495E;
+    --midnight-blue: #2C3E50;
+    --sun-flower: #F1C40F;
+    --orange: #F39C12;
+    --carrot: #E67E22;
+    --pumpkin: #D35400;
+    --alizarin: #E74C3C;
+    --pomegranate: #C0392B;
+    --clouds: #ECF0F1;
+    --silver: #BDC3C7;
+    --concrete: #95A5A6;
+    --asbestos: #7F8C8D;
+}
 
-
-html,body {
+html, body, #app {
     height:100%;
     margin: 0;
     padding: 0;
 }
 
-#app, #graph-container {
-    min-height: 100%;
-}
-
-.scrollable {
-    height: auto;
-    max-height: 500px;
-    overflow-x: hidden;
-}
-
-.controls {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: white;
-}
-
-
-.loader {
-    border: 10px solid #f3f3f3;
-    border-top: 10px solid rgb(0, 150, 136);
-    border-radius: 60%;
-    width: 60px;
-    height:60px;
-    animation: spin 1s linear infinite;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin: -30px 0 0 -30px;
- }
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.information {
-    margin-top: 20px;
-    padding: 0;
-    color: white;
-}
-
-#cy {
+.columns {
+    margin: 0;
     height: 100%;
-    padding:0;
 }
+
+.column {
+    height: 100%;
+}
+
+#sidenav {
+    background-color: var(--clouds); 
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 30px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+#sidenav .left-margin {
+    margin-left: 30px;
+}
+
+#sidenav .control {
+    margin-bottom: 20px;
+}
+
+#sidenav .control div {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#sidenav .information {
+    color: white;
+} 
+
+#main {
+    padding: 0px;
+}
+
+#main svg {
+    height: 100%;
+    width: 100%;
+}
+

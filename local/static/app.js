@@ -1,10 +1,6 @@
-
-
 var app = new Vue({
   el: '#app',
   data: {
-    width: 0,
-    height: 0,
     picked: "topBen",
     selected: "default",
     topBeneficiaries: [],
@@ -17,7 +13,7 @@ var app = new Vue({
     isNodeHovered: function () { return this.nodeHovered !== null; },
     isLinkHovered: function () { return this.linkHovered !== null; },
     infoBackgroundColor: function () {
-      return this.nodeHovered.entity === this.selected ? "var(--red)" : "var(--blue)";
+      return this.nodeHovered.entity === this.selected ? "var(--pomegranate)" : "var(--peter-river)";
     },
     breakDownLinks: function () {
       var vm = this;
@@ -59,10 +55,6 @@ var app = new Vue({
     }
   },
   created: function () {
-    this.setSvgSize();
-
-    // add resize event handler
-    window.addEventListener('resize', this.handleResize)
 
     // Load top donneurs and top beneficiaires list
     var topBeneficiariesUrl = "/top_beneficiaries";
@@ -79,6 +71,7 @@ var app = new Vue({
 
   },
   mounted: function () {
+    
     this.svg = d3.select("svg");
     this.graph = d3.select(".graph");
     this.link = d3.select(".links").selectAll(".link");
@@ -88,22 +81,20 @@ var app = new Vue({
     this.text = d3.select('.nodelabels').selectAll(".nodelabel");
 
     this.svg.call(d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed));
+    var svgSize = this.getSvgSize();
     this.simulation = d3.forceSimulation()
       .force("link", d3.forceLink().id(function (d) { return d.id; }).distance(50))
       .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter(this.width / 2, this.height / 2))
+      .force("center", d3.forceCenter(svgSize.width / 2, svgSize.height / 2))
   },
   beforeDestroy: function () {
     window.removeEventListener('resize', this.handleResize);
   },
   methods: {
-    handleResize: function () {
-      this.setSvgSize();
-    },
-    setSvgSize: function () {
-      var graphContainer = document.getElementById("graph-container");
-      this.width = graphContainer.clientWidth;
-      this.height = graphContainer.clientHeight;
+    getSvgSize: function(){
+      var svg = document.getElementById("svg")
+      var boundingClientRect = svg.getBoundingClientRect() 
+      return { width: boundingClientRect.width, height: boundingClientRect.height };
     },
     getNetworkUrl: function (node) {
       if (this.selected != "default") {
@@ -254,7 +245,7 @@ var app = new Vue({
         .call(function (link) { link.transition().attr("stroke-opacity", 0.2) })
         .attr("class", "link")
         .attr("marker-end", "url(#arrowhead)")
-        .attr("stroke", "var(--gray)")
+        .attr("stroke", "var(--asbestos)")
         .attr("stroke-width", "1")
         .on("mouseenter", vm.handleLinkMouseEnter)
         .on("mouseout", vm.handleLinkMouseOut)
@@ -281,15 +272,15 @@ var app = new Vue({
 
       var newEdgelabels = vm.edgelabels.enter()
         .append('text')
-        .style("pointer-events", "none")
+        .style('pointer-events', 'none')
         .attr('class', 'edgelabel')
         .attr('font-family', 'sans-serif')
-        .attr('font-size', 2)
+        .attr('font-size', "2px")
 
       newEdgelabels.append('textPath')
-        .style("text-anchor", "middle")
+        .style('text-anchor', 'middle')
         .style("pointer-events", "none")
-        .style('fill', 'var(--gray-dark)')
+        .style('fill', 'black')
         .attr("startOffset", "50%")
         .text(function (d) {
           var rounded = Math.round(d.valeur_euro);
@@ -311,7 +302,7 @@ var app = new Vue({
         .append("circle")
         .attr("class", "node")
         .attr("fill", function (d) {
-          return d.id == app.selected ? "var(--red)" : "var(--blue)";
+          return d.id == app.selected ? "var(--pomegranate)" : "var(--peter-river)";
         })
         .attr("opacity", 0.5)
         .call(function (node) { node.transition().attr("r", 3); })
@@ -353,8 +344,8 @@ var app = new Vue({
         .attr("y", 0)
         .style("text-anchor", "middle")
         .style("font-family", "sans-serif")
-        .style("font-size", "2")
-        .style("fill", "var(--gray-dark)")
+        .style("font-size", "2px")
+        .style("fill", "black")
         .text(function (d) {
           var label = d.prenom_nom + " (" + d.degree + ")"
           return label;
