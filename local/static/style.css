@@ -29,10 +29,6 @@ html, body, #app {
     font-family: 'Roboto Mono', monospace;
 }
 
-select option {
-    background-color: green;
-}
-
 .columns {
     margin: 0;
     height: 100%;

@@ -73,8 +73,14 @@ var app = new Vue({
       if (this.selected != "default") {
         if (this.simulation) {
           this.simulation.stop();
+        } else {
+          var svgSize = this.getSvgSize();
+          this.simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(function (d) { return d.id; }).distance(50))
+            .force("charge", d3.forceManyBody())
+            .force("center", d3.forceCenter(svgSize.width / 2, svgSize.height / 2))
         }
-        var networkUrl = this.getNetworkUrl(this.selected);
+        var networkUrl = this.getNetworkUrl();
         this.isLoading = true;
         var vm = this;
         vm.diGraph = { links: [], nodes: [] };
@@ -115,11 +121,6 @@ var app = new Vue({
     this.text = d3.select('.nodelabels').selectAll(".nodelabel");
 
     this.svg.call(d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed));
-    var svgSize = this.getSvgSize();
-    this.simulation = d3.forceSimulation()
-      .force("link", d3.forceLink().id(function (d) { return d.id; }).distance(50))
-      .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter(svgSize.width / 2, svgSize.height / 2))
   },
   beforeDestroy: function () {
     window.removeEventListener('resize', this.handleResize);
@@ -130,10 +131,10 @@ var app = new Vue({
       var boundingClientRect = svg.getBoundingClientRect() 
       return { width: boundingClientRect.width, height: boundingClientRect.height };
     },
-    getNetworkUrl: function (node) {
-      if (this.selected != "default") {
+    getNetworkUrl: function () {
+      if (this.selected != "default" && this.dataset != "default") {
         var baseUrl = "/draw_network";
-        return baseUrl + "?id=" + node;
+        return baseUrl + "?id=" + this.selected + "&" + "dataset=" + this.dataset;
       }
       return "";
     },
