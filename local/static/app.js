@@ -1,11 +1,14 @@
 var app = new Vue({
   el: '#app',
   data: {
+    datasets: [],
+    dataset: "default",
     picked: "topBen",
     selected: "default",
     topBeneficiaries: [],
     topDonneurs: [],
-    isGraphLoading: false,
+    isReady: false,
+    isLoading: true,
     nodeHovered: null,
     linkHovered: null
   },
@@ -30,6 +33,41 @@ var app = new Vue({
     }
   },
   watch: {
+    dataset: function(dataset){
+
+      var vm = this;
+      if (dataset == "default") {
+        vm.topBeneficiaries = [];
+        vm.topDonneurs = [];
+      } else {
+        // Load top donneurs and top beneficiaires list
+        var topBeneficiariesUrl = "/top_beneficiaries";
+        var topDonneursUrl = "/top_donneurs";
+
+        vm.isLoading = true;
+
+        var promiseTopBen = new Promise(function (resolve) {
+          var fullUrl = topBeneficiariesUrl + "?dataset=" + dataset;
+          $.getJSON(fullUrl, function (topBen) {
+            vm.topBeneficiaries = topBen;
+            resolve();
+          });
+        });
+
+        var promiseTopDon = new Promise(function (resolve) {
+          var fullUrl = topDonneursUrl + "?dataset=" + dataset;
+          $.getJSON(fullUrl, function (topDon) {
+            vm.topDonneurs = topDon;
+            resolve();
+          });
+        })
+
+        Promise.all([promiseTopBen, promiseTopDon]).then(function () {
+          vm.isLoading = false;
+        });
+      }
+ 
+    },
     selected: function (v) {
       // update the data and re-draw the graph
       if (this.selected != "default") {
@@ -37,13 +75,13 @@ var app = new Vue({
           this.simulation.stop();
         }
         var networkUrl = this.getNetworkUrl(this.selected);
-        this.isGraphLoading = true;
+        this.isLoading = true;
         var vm = this;
         vm.diGraph = { links: [], nodes: [] };
         vm.draw();
         $.getJSON(networkUrl, function (response) {
 
-          vm.isGraphLoading = false;
+          vm.isLoading = false;
           // de-activate all nodes and links by default
           vm.diGraph = response.data;
           vm.diGraph = vm.collapseAll(vm.diGraph);
@@ -56,18 +94,14 @@ var app = new Vue({
   },
   created: function () {
 
-    // Load top donneurs and top beneficiaires list
-    var topBeneficiariesUrl = "/top_beneficiaries";
-    var topDonneursUrl = "/top_donneurs";
+    var datasetsUrl = "/datasets"
     var vm = this;
 
-    $.getJSON(topBeneficiariesUrl, function (topBen) {
-      vm.topBeneficiaries = topBen;
-    });
-
-    $.getJSON(topDonneursUrl, function (topDon) {
-      vm.topDonneurs = topDon;
-    });
+    $.getJSON(datasetsUrl, function(datasets){
+      vm.datasets = datasets;
+      vm.isReady = true;
+      vm.isLoading = false;  
+    })
 
   },
   mounted: function () {
