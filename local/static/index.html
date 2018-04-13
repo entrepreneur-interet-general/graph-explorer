@@ -8,56 +8,71 @@
 	<link rel="stylesheet" href="/local/static/bulma.css">
 	<script defer src="/local/static/fontawesome.js"></script>
 	<link rel="stylesheet" href="/local/static/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
 	<script type="text/javascript" src="/local/static/jquery-3.3.1.min.js"></script>
 	<script type="text/javascript" src="/local/static/d3.v4.js"></script>
 	<script type="text/javascript" src="/local/static/vue.js"></script>
 </head>
+
 <body>
 	<div id=app>
-		<div class="columns">
+		<div class="loader" v-show="isLoading"></div>
+		<div class="columns" v-show="isReady">
 			<div id="sidenav" class="column is-one-fifth">
+				<label class="label left-margin is-size-6">Choisir un dataset:</label>
 				<div class="control left-margin">
-					<div>
-						<input type="radio" name="optionsRadios" id="optionsRadio1" value="topBen" v-model="picked">
-						<label for="optionsRadio1" class="radio"> Top bénéficiaires </label>
-					</div>
-					<div>
-						<input type="radio" name="optionsRadios" id="optionsRadio2" value="topDon" v-model="picked">
-						<label for="optionsRadio2" class="radio">Top donneurs</label>
-					</div>
-				</div>
-				<label class="label left-margin">Enquêter sur:</label>
-				<div class="control left-margin">
-					<div class="select">
-						<select v-model="selected">
-							<option value="default" selected>...</option>
-							<option :value="don.entity" v-if="picked == 'topDon'" v-for="don in topDonneurs">
-								{{ don.prenom_nom }}
-							</option>
-							<option :value="ben.entity" v-if="picked == 'topBen'" v-for="ben in topBeneficiaries">
-								{{ ben.prenom_nom }}
+					<div class="select is-normal">
+						<select v-model="dataset">
+							<option value="default" selected>Sélectionner</option>
+							<option :value="dataset.id" v-for="dataset in datasets">
+								{{ dataset.name }}
 							</option>
 						</select>
 					</div>
 				</div>
-				<div class="information" v-bind:style="{ 'background-color': infoBackgroundColor }" v-if="isNodeHovered">
-					<div class="left-margin">
-						<div>{{ nodeHovered.prenom_nom }} </div>
-						<div> {{ nodeHovered.pays }} </div>
-						<div> {{ nodeHovered.code_postal }} </div>
+				<div v-show="dataset != 'default'">
+					<div class="control left-margin">
+						<div>
+							<input type="radio" name="optionsRadios" id="optionsRadio1" value="topBen" v-model="picked">
+							<label class="is-size-6" for="optionsRadio1" class="radio"> Top bénéficiaires </label>
+						</div>
+						<div>
+							<input type="radio" name="optionsRadios" id="optionsRadio2" value="topDon" v-model="picked">
+							<label class="is-size-6" for="optionsRadio2" class="radio">Top donneurs</label>
+						</div>
 					</div>
-				</div>
-				<div class="container-fluid information" style="background-color: var(--asbestos);" v-if="isLinkHovered">
-					<div class="left-margin">
-						<div v-for="transaction in linkHovered.transactions">
-							{{ transaction.valeur_euro + " €"}}
-						</div>					
+					<label class="label left-margin is-size-6">Enquêter sur:</label>
+					<div class="control left-margin">
+						<div class="select is-normal">
+							<select v-model="selected">
+								<option value="default" selected>Sélectionner</option>
+								<option :value="don.entity" v-if="picked == 'topDon'" v-for="don in topDonneurs">
+									{{ don.prenom_nom }}
+								</option>
+								<option :value="ben.entity" v-if="picked == 'topBen'" v-for="ben in topBeneficiaries">
+									{{ ben.prenom_nom }}
+								</option>
+							</select>
+						</div>
+					</div>
+					<div class="information" v-bind:style="{ 'background-color': infoBackgroundColor }" v-if="isNodeHovered">
+						<div class="left-margin">
+							<div>{{ nodeHovered.prenom_nom }} </div>
+							<div> {{ nodeHovered.pays }} </div>
+							<div> {{ nodeHovered.code_postal }} </div>
+						</div>
+					</div>
+					<div class="container-fluid information" style="background-color: var(--asbestos);" v-if="isLinkHovered">
+						<div class="left-margin">
+							<div v-for="transaction in linkHovered.transactions">
+								{{ transaction.valeur_euro + " €"}}
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
 			<!-- Add all page content inside this div -->
 			<div id="main" class="column">
-				<div class="loader" v-show="isGraphLoading"></div> 
 				<svg id="svg">
 					<defs>
 						<marker id="arrowhead" viewBox="-0 -5 10 10" refX="20" refY="0" orient="auto" markerWidth="3" markerHeight="3" xoverflow="visbile">
@@ -72,9 +87,10 @@
 						<g class="nodelabels"></g>
 					</g>
 				</svg>
-			</div>	
-		</div> 
+			</div>
+		</div>
 	</div>
 	<script type="text/javascript" src="/local/static/app.js"></script>
 </body>
+
 </html>
