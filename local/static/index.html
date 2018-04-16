@@ -5,13 +5,13 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Graph Explorer</title>
-	<link rel="stylesheet" href="/local/static/bulma.css">
-	<script defer src="/local/static/fontawesome.js"></script>
-	<link rel="stylesheet" href="/local/static/style.css">
-	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
-	<script type="text/javascript" src="/local/static/jquery-3.3.1.min.js"></script>
-	<script type="text/javascript" src="/local/static/d3.v4.js"></script>
-	<script type="text/javascript" src="/local/static/vue.js"></script>
+	<link rel="stylesheet" href="/local/static/graph-explorer/css/bulma.css">
+	<link rel="stylesheet" href="/local/static/graph-explorer/css/style.css">
+	<link href="/local/static/graph-explorer/css/roboto.css" rel="stylesheet">
+	<script defer src="/local/static/graph-explorer/js/fontawesome.js"></script>
+	<script type="text/javascript" src="/local/static/graph-explorer/js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="/local/static/graph-explorer/js/d3.v4.js"></script>
+	<script type="text/javascript" src="/local/static/graph-explorer/js/vue.js"></script>
 </head>
 
 <body>
@@ -22,7 +22,7 @@
 				<label class="label left-margin is-size-6">Choisir un dataset:</label>
 				<div class="control left-margin">
 					<div class="select is-normal">
-						<select v-model="dataset">
+						<select v-model="dataset" style="width: 200px;">
 							<option value="default" selected>Sélectionner</option>
 							<option :value="dataset.id" v-for="dataset in datasets">
 								{{ dataset.name }}
@@ -44,7 +44,7 @@
 					<label class="label left-margin is-size-6">Enquêter sur:</label>
 					<div class="control left-margin">
 						<div class="select is-normal">
-							<select v-model="selected">
+							<select v-model="selected" style="width: 200px;">
 								<option value="default" selected>Sélectionner</option>
 								<option :value="don.entity" v-if="picked == 'topDon'" v-for="don in topDonneurs">
 									{{ don.prenom_nom }}
@@ -90,7 +90,7 @@
 			</div>
 		</div>
 	</div>
-	<script type="text/javascript" src="/local/static/app.js"></script>
+	<script type="text/javascript" src="/local/static/graph-explorer/js/app.js"></script>
 </body>
 
 </html>

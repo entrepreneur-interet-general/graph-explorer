@@ -41,8 +41,13 @@ var app = new Vue({
         vm.topDonneurs = [];
       } else {
         // Load top donneurs and top beneficiaires list
-        var topBeneficiariesUrl = "/top_beneficiaries";
-        var topDonneursUrl = "/top_donneurs";
+        var topBeneficiariesUrl = typeof(getWebAppBackendUrl) === 'undefined' ? 
+          "/top_beneficiaries": 
+          getWebAppBackendUrl('top_beneficiaries');
+
+        var topDonneursUrl = typeof(getWebAppBackendUrl) === 'undefined' ? 
+          "/top_donneurs":
+          getWebAppBackendUrl('top_donneurs');
 
         vm.isLoading = true;
 
@@ -100,7 +105,7 @@ var app = new Vue({
   },
   created: function () {
 
-    var datasetsUrl = "/datasets"
+    var datasetsUrl = typeof(getWebAppBackendUrl) === 'undefined' ? "/datasets" : getWebAppBackendUrl('datasets');
     var vm = this;
 
     $.getJSON(datasetsUrl, function(datasets){
@@ -133,7 +138,7 @@ var app = new Vue({
     },
     getNetworkUrl: function () {
       if (this.selected != "default" && this.dataset != "default") {
-        var baseUrl = "/draw_network";
+        var baseUrl = typeof(getWebAppBackendUrl) === 'undefined' ? "/draw_network" : getWebAppBackendUrl('draw_network');
         return baseUrl + "?id=" + this.selected + "&" + "dataset=" + this.dataset;
       }
       return "";
