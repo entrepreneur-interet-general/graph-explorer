@@ -45,10 +45,12 @@ def home():
 def send_static(path):
     return send_from_directory('local/static', path)
 
+
 @app.route('/datasets')
 def get_datasets():
     data = [ { "id": k, "name": v["name"]} for (k, v) in datasets.items() ]
     return json.dumps(data)
+
 
 @app.route('/draw_network')
 def draw_network():
@@ -67,6 +69,20 @@ def draw_network():
 
     return json.dumps({"status": "ok", "data": data})
 
+
+@app.route('/search')
+def search():
+    pattern = request.args["pattern"]
+    data = []
+    if pattern:
+        pattern = pattern.lower()
+        dataset_id = request.args["dataset"]
+        dataset = datasets[dataset_id]
+        G = dataset["graph"]
+        nodes = [G.node[n] for n in G]
+        suggestions = [node for node in nodes if pattern in node['prenom_nom'].lower()][:5]
+        data = json.dumps(suggestions)
+    return json.dumps(data)
 
 @app.route('/top_beneficiaries')
 def get_top_beneficiaries():

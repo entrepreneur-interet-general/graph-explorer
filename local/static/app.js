@@ -2,121 +2,119 @@ var app = new Vue({
   el: '#app',
   data: {
     datasets: [],
-    dataset: "default",
-    picked: "topBen",
-    selected: "default",
-    topBeneficiaries: [],
-    topDonneurs: [],
-    isReady: false,
-    isLoading: true,
-    nodeHovered: null,
-    linkHovered: null
+    datasetSelected: { id: "", name: "" },
+    dropdownContentDisplay: "none",
+    drawerExpanded: true,
+    loaderDisplay: "block",
+    detailsModalDisplay: "none",
+    searchPattern: "",
+    searchSuggestions: [],
+    searchEntity: null,
+    focusNode: null,
+    diGraph: {},
+    linkDetail: null
   },
   computed: {
-    isNodeHovered: function () { return this.nodeHovered !== null; },
-    isLinkHovered: function () { return this.linkHovered !== null; },
-    infoBackgroundColor: function () {
-      return this.nodeHovered.entity === this.selected ? "var(--pomegranate)" : "var(--peter-river)";
+    arrowClass: function () {
+      return this.drawerExpanded ? "arrow-left" : "arrow-right";
     },
-    breakDownLinks: function () {
-      var vm = this;
-      if (vm.linkHovered === null) {
-        return [];
-      } else {
-        return vm.multiDiGraph.links.filter(function (l) {
-          if (vm.source(l) == vm.source(vm.linkHovered) && vm.target(l) == vm.target(vm.linkHovered)) {
-            return true;
-          }
-          return false;
-        })
+    drawerStyle: function() {
+      var drawerWidth = this.drawerExpanded ? "355px" : "0px";
+      var drawerDisplay = this.focusNode ? "block" : "none";
+      return {
+        "display": drawerDisplay,
+        "min-width": drawerWidth,
+        "max-width": drawerWidth
       }
+    },
+    identityCardStyle: function(){
+      var backgroundColor = this.focusNode ?
+        this.focusNode.entity == this.searchEntity ?
+          "var(--pomegranate)" : 
+          "var(--peter-river)" : {};
+      return { "background-color": backgroundColor };
+    },
+    outLinks: function(){
+      var vm = this;
+      if (vm.diGraph && vm.focusNode) {
+        var links = vm.diGraph.links.filter(function(link){
+          return vm.source(link) == vm.focusNode.entity;
+        });
+        return links.map(function(link){
+          if (!link.active){
+            link.source = vm.getNode(link.source);
+            link.target = vm.getNode(link.target);
+          }
+          return link;
+        });
+      }
+      return [];
+    },
+    inLinks: function(){
+      var vm = this;
+      if (vm.diGraph && vm.focusNode) {
+        var links = vm.diGraph.links.filter(function(link){
+          return vm.target(link) == vm.focusNode.entity;
+        })
+        return links.map(function(link){
+          if (!link.active){
+            link.source = vm.getNode(link.source);
+            link.target = vm.getNode(link.target);
+          }
+          return link;
+        });
+      }
+      return [];
     }
   },
   watch: {
-    dataset: function(dataset){
-
-      var vm = this;
-      if (dataset == "default") {
-        vm.topBeneficiaries = [];
-        vm.topDonneurs = [];
+    searchPattern: debounce(function () {
+      if (document.activeElement.id == "search-input"){
+        this.search();
+      }
+    }, 300),
+    searchEntity: function (entity) {
+      this.loaderDisplay = "block";
+      if (this.simulation) {
+        this.simulation.stop();
       } else {
-        // Load top donneurs and top beneficiaires list
-        var topBeneficiariesUrl = typeof(getWebAppBackendUrl) === 'undefined' ? 
-          "/top_beneficiaries": 
-          getWebAppBackendUrl('top_beneficiaries');
+        var svgSize = this.getSvgSize();
+        this.simulation = d3.forceSimulation()
+          .force("link", d3.forceLink().id(function (d) { return d.id; }).distance(50))
+          .force("charge", d3.forceManyBody())
+          .force("center", d3.forceCenter((svgSize.width - 355) / 2, svgSize.height / 2))
+      }
+      var networkUrl = this.getNetworkUrl();
+      var vm = this;
+      vm.diGraph = { links: [], nodes: [] };
+      vm.draw();
+      $.getJSON(networkUrl, function (response) {
+        vm.isLoading = false;
+        // de-activate all nodes and links by default
+        vm.diGraph = response.data;
+        vm.diGraph = vm.collapseAll(vm.diGraph);
+        vm.diGraph = vm.expand(vm.diGraph, vm.searchEntity);
 
-        var topDonneursUrl = typeof(getWebAppBackendUrl) === 'undefined' ? 
-          "/top_donneurs":
-          getWebAppBackendUrl('top_donneurs');
-
-        vm.isLoading = true;
-
-        var promiseTopBen = new Promise(function (resolve) {
-          var fullUrl = topBeneficiariesUrl + "?dataset=" + dataset;
-          $.getJSON(fullUrl, function (topBen) {
-            vm.topBeneficiaries = topBen;
-            resolve();
-          });
-        });
-
-        var promiseTopDon = new Promise(function (resolve) {
-          var fullUrl = topDonneursUrl + "?dataset=" + dataset;
-          $.getJSON(fullUrl, function (topDon) {
-            vm.topDonneurs = topDon;
-            resolve();
-          });
+        // search the node corresponding to the search entity
+        vm.focusNode = vm.diGraph.nodes.find(function(node){
+          return node.entity == entity;
         })
 
-        Promise.all([promiseTopBen, promiseTopDon]).then(function () {
-          vm.isLoading = false;
-        });
-      }
- 
-    },
-    selected: function (v) {
-      // update the data and re-draw the graph
-      if (this.selected != "default") {
-        if (this.simulation) {
-          this.simulation.stop();
-        } else {
-          var svgSize = this.getSvgSize();
-          this.simulation = d3.forceSimulation()
-            .force("link", d3.forceLink().id(function (d) { return d.id; }).distance(50))
-            .force("charge", d3.forceManyBody())
-            .force("center", d3.forceCenter(svgSize.width / 2, svgSize.height / 2))
-        }
-        var networkUrl = this.getNetworkUrl();
-        this.isLoading = true;
-        var vm = this;
-        vm.diGraph = { links: [], nodes: [] };
+        vm.loaderDisplay = "none";
         vm.draw();
-        $.getJSON(networkUrl, function (response) {
-
-          vm.isLoading = false;
-          // de-activate all nodes and links by default
-          vm.diGraph = response.data;
-          vm.diGraph = vm.collapseAll(vm.diGraph);
-          vm.diGraph = vm.expand(vm.diGraph, vm.selected);
-
-          vm.draw();
-        })
-      }
+      })
     }
   },
-  created: function () {
-
-    var datasetsUrl = typeof(getWebAppBackendUrl) === 'undefined' ? "/datasets" : getWebAppBackendUrl('datasets');
-    var vm = this;
-
-    $.getJSON(datasetsUrl, function(datasets){
-      vm.datasets = datasets;
-      vm.isReady = true;
-      vm.isLoading = false;  
-    })
-
-  },
   mounted: function () {
-    
+    var datasetsUrl = typeof (getWebAppBackendUrl) === 'undefined' ? "/datasets" : getWebAppBackendUrl('datasets');
+    var vm = this;
+    $.getJSON(datasetsUrl, function (datasets) {
+      vm.datasets = datasets;
+      vm.datasetSelected = vm.datasets[0]
+      vm.loaderDisplay = "none";
+    })
+    window.addEventListener("click", this.handleWindowClicked);
+
     this.svg = d3.select("svg");
     this.graph = d3.select(".graph");
     this.link = d3.select(".links").selectAll(".link");
@@ -124,24 +122,17 @@ var app = new Vue({
     this.edgelabels = d3.select(".edgelabels").selectAll(".edgelabel");
     this.node = d3.select(".nodes").selectAll(".node");
     this.text = d3.select('.nodelabels').selectAll(".nodelabel");
-
-    this.svg.call(d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed));
+    this.svg.call(d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed)).on("dblclick.zoom", null);
+    
   },
   beforeDestroy: function () {
-    window.removeEventListener('resize', this.handleResize);
+    window.removeEventListener("click", this.handleWindowClicked);
   },
   methods: {
-    getSvgSize: function(){
+    getSvgSize: function () {
       var svg = document.getElementById("svg")
-      var boundingClientRect = svg.getBoundingClientRect() 
+      var boundingClientRect = svg.getBoundingClientRect()
       return { width: boundingClientRect.width, height: boundingClientRect.height };
-    },
-    getNetworkUrl: function () {
-      if (this.selected != "default" && this.dataset != "default") {
-        var baseUrl = typeof(getWebAppBackendUrl) === 'undefined' ? "/draw_network" : getWebAppBackendUrl('draw_network');
-        return baseUrl + "?id=" + this.selected + "&" + "dataset=" + this.dataset;
-      }
-      return "";
     },
     zoomed: function () {
       if (this.graph) {
@@ -193,6 +184,62 @@ var app = new Vue({
         }
       });
     },
+    getNetworkUrl: function () {
+      var baseUrl = typeof (getWebAppBackendUrl) === 'undefined' ? "/draw_network" : getWebAppBackendUrl('draw_network');
+      return baseUrl + "?id=" + this.searchEntity + "&" + "dataset=" + this.datasetSelected.id;
+    },
+    handleDrawerButtonClicked: function () {
+      this.drawerExpanded = !this.drawerExpanded;
+    },
+    handleWindowClicked: function (event) {
+      var detailsModal = document.getElementById('details-modal');
+      if (event.target == detailsModal) {
+        this.closeModal()
+      }
+      if (document.activeElement.id != "search-input") {
+        this.searchSuggestions = [];
+      }
+    },
+    handleDropdownItemClicked: function (event) {
+      this.datasetSelected = { id: event.target.value, name: event.target.text };
+      this.closeDropdown();
+    },
+    handleSearchSuggestionClicked: function (event) {
+      this.searchEntity = parseInt(event.target.value);
+      this.searchPattern = event.target.text;
+      this.searchSuggestions = [];
+    },
+    clearSearch: function(event) {
+      this.searchPattern = "";
+      this.searchSuggestions = [];
+    },
+    handleSearchInputFocus: function(){
+      this.search();
+    },
+    openModal: function(link) {
+      this.linkDetail = link; 
+      this.detailsModalDisplay = "block";
+    },
+    closeModal: function () {
+      this.detailsModalDisplay = "none";
+    },
+    openDropdown: function () {
+      this.dropdownContentDisplay = "block";
+    },
+    closeDropdown: function () {
+      this.dropdownContentDisplay = "none";
+    },
+    search: function () {
+      var searchUrl = typeof (getWebAppBackendUrl) === 'undefined' ? "/search" : getWebAppBackendUrl('search');
+      var fullUrl = searchUrl + "?dataset=" + this.datasetSelected.id + "&" + "pattern=" + this.searchPattern;
+      var vm = this;
+      $.getJSON(fullUrl, function (suggestions) {
+        vm.searchSuggestions = suggestions;
+      })
+    },
+    handleNodeClicked: function(n){
+      this.focusNode = n;
+    },
     source: function (link) {
       // For some reasons links have either of these two formats
       // 1. { source: 1, target: 2 }
@@ -201,6 +248,11 @@ var app = new Vue({
     },
     target: function (link) {
       return typeof (link.target) === 'object' ? link.target.entity : link.target
+    },
+    getNode: function(entity){
+      return this.diGraph.nodes.find(function(n) {
+        return n.entity == entity;
+      })
     },
     collapseAll: function (graph) {
       var collapsedGraph = {};
@@ -255,6 +307,7 @@ var app = new Vue({
       vm.draw();
     },
     draw: function () {
+
       var vm = this;
 
       var activeLinks = vm.diGraph.links.filter(function (link) { return link.active; });
@@ -342,16 +395,12 @@ var app = new Vue({
         .append("circle")
         .attr("class", "node")
         .attr("fill", function (d) {
-          return d.id == app.selected ? "var(--pomegranate)" : "var(--peter-river)";
+          return d.id == vm.searchEntity ? "var(--pomegranate)" : "var(--peter-river)";
         })
         .attr("opacity", 0.5)
         .call(function (node) { node.transition().attr("r", 3); })
-        .attr("cursor", "grab")
-        .on("click", function (n) {
-          vm.expandOrCollapse(n);
-        })
-        .on("mouseenter", vm.handleNodeMouseEnter)
-        .on("mouseout", vm.handleNodeMouseOut)
+        .on("click", vm.handleNodeClicked)
+        .on("dblclick", vm.expandOrCollapse)
         .call(d3.drag()
           .on("start", vm.dragstarted)
           .on("drag", vm.dragged)
@@ -366,18 +415,13 @@ var app = new Vue({
       var newText = vm.text
         .enter()
         .append("g")
-        .attr("cursor", "grab")
         .attr("class", "nodelabel")
-        .on("click", function (n) {
-          vm.expandOrCollapse(n);
-        })
-        .on("mouseenter", this.handleNodeMouseEnter)
-        .on("mouseout", this.handleNodeMouseOut)
+        .on("click", vm.handleNodeClicked)
+        .on("dblclick", vm.expandOrCollapse)
         .call(d3.drag()
           .on("start", vm.dragstarted)
           .on("drag", vm.dragged)
           .on("end", vm.dragended))
-
 
       newText.append("text")
         .attr("x", 0)
@@ -400,19 +444,6 @@ var app = new Vue({
       vm.simulation.force("link").links(activeLinks)
 
       vm.simulation.alpha(1).restart()
-
-    },
-    handleNodeMouseEnter: function (n) {
-      this.nodeHovered = n;
-    },
-    handleNodeMouseOut: function (n) {
-      this.nodeHovered = null;
-    },
-    handleLinkMouseEnter: function (l) {
-      this.linkHovered = l;
-    },
-    handleLinkMouseOut: function (l) {
-      this.linkHovered = null;
     }
   }
-});
+})
