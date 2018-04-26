@@ -201,12 +201,12 @@ var app = new Vue({
       }
     },
     handleDropdownItemClicked: function (event) {
-      this.datasetSelected = { id: event.target.value, name: event.target.text };
+      this.datasetSelected = { id: event.target.getAttribute("value"), name: event.target.textContent };
       this.closeDropdown();
     },
     handleSearchSuggestionClicked: function (event) {
-      this.searchEntity = parseInt(event.target.value);
-      this.searchPattern = event.target.text;
+      this.searchEntity = parseInt(event.target.getAttribute("value"));
+      this.searchPattern = event.target.textContent;
       this.searchSuggestions = [];
     },
     clearSearch: function(event) {

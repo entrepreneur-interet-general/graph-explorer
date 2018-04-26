@@ -18,12 +18,12 @@
 		<div class="navbar">
 			<div class="dropdown" @mouseleave="closeDropdown" @mouseover="openDropdown">
 				<span class="dropdown-selection" :value="datasetSelected.id">{{ datasetSelected.name }} </span>
-				<span class="dropdown-caret">
+				<div class="dropdown-caret">
 					<i class="material-icons">expand_more</i>
-				</span>
+				</div>
 				<div id="dropdown-content" class="dropdown-content" v-bind:style="{display: dropdownContentDisplay}">
-					<option class="dropdown-item" v-for="dataset in datasets" :value="dataset.id" v-on:click="handleDropdownItemClicked">{{dataset.name}}
-					</option>
+					<div class="dropdown-item" v-for="dataset in datasets" :value="dataset.id" v-on:click="handleDropdownItemClicked">{{dataset.name}}
+					</div>
 				</div>
 			</div>
 			<div class="search">
@@ -32,8 +32,8 @@
 				<i class="material-icons ic-close" v-on:click="clearSearch">clear</i>
 				<div class="search-suggestion-content">
 					<div class="search-suggestion-item" v-for="suggestion in searchSuggestions">
-						<option :value="suggestion.entity" v-on:click="handleSearchSuggestionClicked">{{ suggestion.prenom_nom }}</option>
-						<i class="material-icons ic-search">person</i>
+						<div :value="suggestion.entity" v-on:click="handleSearchSuggestionClicked">{{ suggestion.prenom_nom }}</div>
+						<i class="material-icons ic-person">person</i>
 					</div>
 				</div>
 			</div>

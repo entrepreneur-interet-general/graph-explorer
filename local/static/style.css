@@ -85,8 +85,8 @@ button {
 
 .dropdown-caret {
     float: right;
-    width: 43px;
 }
+
 
 .dropdown i {
     font-size: 30px;
@@ -162,6 +162,7 @@ button {
 .search .ic-search {
     position: absolute;
     left: 10px;
+    top: 33px;
     color: var(--silver);
 }
 
@@ -172,6 +173,7 @@ button {
 .search .ic-close {
     position: absolute;
     right: 10px;
+    top: 33px;
     color: var(--silver);
     cursor: pointer;
 }
@@ -196,6 +198,7 @@ button {
     border: solid var(--silver);
     border-width: 0 1px 1px 1px;
     cursor: pointer;
+    overflow-x: hidden;
 }
 
 .search-suggestion-content .search-suggestion-item:first-child {
@@ -206,9 +209,10 @@ button {
     background-color: var(--turquoise);
 }
 
-.search-suggestion-item .ic-search {
+.search-suggestion-item .ic-person {
     position: absolute;
     top: 13px;
+    left: 10px;
     color: black;
 }
 
