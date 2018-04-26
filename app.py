@@ -80,8 +80,7 @@ def search():
         dataset = datasets[dataset_id]
         G = dataset["graph"]
         nodes = [G.node[n] for n in G]
-        suggestions = [node for node in nodes if pattern in node['prenom_nom'].lower()][:5]
-        data = json.dumps(suggestions)
+        data = [node for node in nodes if pattern in node['prenom_nom'].lower()][:5]
     return json.dumps(data)
 
 @app.route('/top_beneficiaries')
