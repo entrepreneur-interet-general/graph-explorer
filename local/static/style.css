@@ -399,9 +399,6 @@ button {
     border-collapse: collapse;
 }
 
-.modal-content table tr:last-child {
-    font-weight: bold;
-}
 
 .graph-container {
     width: 100%;
