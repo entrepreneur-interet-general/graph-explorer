@@ -39,6 +39,7 @@ body {
     color: black;
     margin: 0px;
     padding: 0px;
+    overflow-y: hidden;
 }
 
 button {
@@ -46,21 +47,20 @@ button {
     border: 0px;
 }
 
-#app {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-}
-
 .navbar {
     display: flex;
+    position: fixed;
+    top: 0;
+    height: var(--navbar-height);
+    width: 100%;
     border-bottom: solid var(--silver) 1px;
-    min-height: var(--navbar-height);
-    max-height: var(--navbar-height);
+    z-index: 2;
+    background-color: white;
 }
 
 .main {
+    padding-top: var(--navbar-height);
+    box-sizing: border-box;
     height: 100%;
     display: flex;
     flex-direction: row;
@@ -87,8 +87,8 @@ button {
     float: right;
 }
 
-
 .dropdown i {
+    line-height: var(--navbar-height);
     font-size: 30px;
 }
 
@@ -97,6 +97,9 @@ button {
     position: absolute;
     top: var(--navbar-height);
     z-index: 2; /* stay on top */
+    overflow-y: scroll;
+    max-height: 500px;
+    border: solid var(--silver) 1px;
 }
 
 
@@ -110,11 +113,11 @@ button {
     height: var(--navbar-height);
     background-color: white;
     border: solid var(--silver);
-    border-width: 0 1px 1px 1px;
+    border-width: 1px 0px 0px 0px;
 }
 
 .dropdown-content .dropdown-item:first-child {
-    border-width: 1px 1px 1px 1px; 
+    border-width: 0px; 
 } 
 
 .dropdown-item:hover {
@@ -124,7 +127,6 @@ button {
 .dropdown:hover i {
     color: var(--turquoise)
 }
-
 
 .search {
     font-size: 20px;
@@ -199,6 +201,7 @@ button {
     border-width: 0 1px 1px 1px;
     cursor: pointer;
     overflow-x: hidden;
+    white-space: nowrap;
 }
 
 .search-suggestion-content .search-suggestion-item:first-child {
@@ -215,6 +218,7 @@ button {
     left: 10px;
     color: black;
 }
+
 
 .drawer {
     max-width: 355px;
@@ -288,6 +292,9 @@ button {
 
 .table-cell {
     display: table-cell;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 130px;
 }
 
 .table-row .table-cell:first-child {
@@ -319,6 +326,7 @@ button {
 }
 
 .link-info {
+    font-size: 0.8em;
     margin-top: 20px;
     margin-bottom: 20px;
 }

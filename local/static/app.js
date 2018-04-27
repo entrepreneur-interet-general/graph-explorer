@@ -41,10 +41,8 @@ var app = new Vue({
           return vm.source(link) == vm.focusNode.entity;
         });
         return links.map(function(link){
-          if (!link.active){
-            link.source = vm.getNode(link.source);
-            link.target = vm.getNode(link.target);
-          }
+          link.source = typeof(link.source) === 'object' ? link.source : vm.getNode(link.source);
+          link.target = typeof(link.target) === 'object' ? link.target : vm.getNode(link.target);
           return link;
         });
       }
@@ -57,10 +55,8 @@ var app = new Vue({
           return vm.target(link) == vm.focusNode.entity;
         })
         return links.map(function(link){
-          if (!link.active){
-            link.source = vm.getNode(link.source);
-            link.target = vm.getNode(link.target);
-          }
+          link.source = typeof(link.source) === 'object' ? link.source : vm.getNode(link.source);
+          link.target = typeof(link.target) === 'object' ? link.target : vm.getNode(link.target);
           return link;
         });
       }
@@ -102,6 +98,12 @@ var app = new Vue({
 
         vm.loaderDisplay = "none";
         vm.draw();
+      })
+    },
+    focusNode: function(){
+      var vm = this;
+      vm.node.attr("opacity", function(node){
+        return node.entity == vm.focusNode.entity ? 0.9: 0.5;
       })
     }
   },
@@ -185,7 +187,7 @@ var app = new Vue({
       });
     },
     getNetworkUrl: function () {
-      var baseUrl = typeof (getWebAppBackendUrl) === 'undefined' ? "/draw_network" : getWebAppBackendUrl('draw_network');
+      var baseUrl = typeof (getWebAppBackendUrl) === 'undefined' ? "/connected_component" : getWebAppBackendUrl('connected_component');
       return baseUrl + "?id=" + this.searchEntity + "&" + "dataset=" + this.datasetSelected.id;
     },
     handleDrawerButtonClicked: function () {
@@ -367,7 +369,6 @@ var app = new Vue({
         .append('text')
         .style('pointer-events', 'none')
         .attr('class', 'edgelabel')
-        .attr('font-family', 'sans-serif')
         .attr('font-size', "2px")
 
       newEdgelabels.append('textPath')
@@ -397,7 +398,9 @@ var app = new Vue({
         .attr("fill", function (d) {
           return d.id == vm.searchEntity ? "var(--pomegranate)" : "var(--peter-river)";
         })
-        .attr("opacity", 0.5)
+        .attr("opacity", function(node){
+          return node.entity == vm.focusNode.entity ? 1.0: 0.5;
+        })
         .call(function (node) { node.transition().attr("r", 3); })
         .on("click", vm.handleNodeClicked)
         .on("dblclick", vm.expandOrCollapse)
@@ -427,7 +430,6 @@ var app = new Vue({
         .attr("x", 0)
         .attr("y", 0)
         .style("text-anchor", "middle")
-        .style("font-family", "sans-serif")
         .style("font-size", "2px")
         .style("fill", "black")
         .text(function (d) {

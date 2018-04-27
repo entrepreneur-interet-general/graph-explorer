@@ -48,12 +48,18 @@ def send_static(path):
 
 @app.route('/datasets')
 def get_datasets():
+    """  Returns a list of all available datasets
+    """
     data = [ { "id": k, "name": v["name"]} for (k, v) in datasets.items() ]
     return json.dumps(data)
 
 
-@app.route('/draw_network')
-def draw_network():
+@app.route('/connected_component')
+def network():
+    """ Returns the connected component of node "id" in graph "dataset" (undirected)
+        :param id: The id of the central node 
+        :param dataset: The graph we are interested in
+    """
 
     node = int(request.args["id"])
     dataset_id = request.args["dataset"]
@@ -69,9 +75,13 @@ def draw_network():
 
     return json.dumps({"status": "ok", "data": data})
 
-
 @app.route('/search')
 def search():
+    """ Search for a specific name containing pattern "pattern" in graph "dataset" 
+        and returns top 5 suggestions 
+        :param pattern: The pattern we are searching 
+        :param dataset: The graph we are interested in
+    """
     pattern = request.args["pattern"]
     data = []
     if pattern:
@@ -80,18 +90,6 @@ def search():
         dataset = datasets[dataset_id]
         G = dataset["graph"]
         nodes = [G.node[n] for n in G]
+        # match if contains substring 
         data = [node for node in nodes if pattern in node['prenom_nom'].lower()][:5]
     return json.dumps(data)
-
-@app.route('/top_beneficiaries')
-def get_top_beneficiaries():
-    dataset = request.args.get("dataset")
-    top_30_beneficiaries = datasets[dataset]["top_30_beneficiaries"]
-    return json.dumps(top_30_beneficiaries)
-
-
-@app.route('/top_donneurs')
-def get_top_donneurs():
-    dataset = request.args.get("dataset")
-    top_30_donneurs = datasets[dataset]["top_30_donneurs"]
-    return json.dumps(top_30_donneurs)

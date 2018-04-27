@@ -46,18 +46,12 @@
 					</div>
 					<div class="table">
 						<div class="table-row">
-							<label class="table-cell" for="nationality">Nationalité:</label>
-							<span class="table-cell" id="nationality">{{focusNode ? focusNode.pays : ''}}</span>
-						</div>
-						<!--  Pas encore disponible dans les données
-							<div class="table-row">
-								<label class="table-cell" for="date-of-birth">Date de naissance:</label>
-								<span class="table-cell" id="date-of-birth">26/02/1989</span>
-							</div> 
-							-->
+							<label class="table-cell" for="nationality">Adresse:</label>
+							<span class="table-cell" id="nationality">{{focusNode ? focusNode.pays + " (" + focusNode.code_postal + ")" : ''}}</span>
+						</div>		
 					</div>
 				</div>
-				<div class="link-info">
+				<div v-if="outLinks.length > 0" class="link-info">
 					<div class="table">
 						<div class="table-caption">Envoie de l'argent à ({{outLinks.length}})</div>
 						<div class="table-row" v-for="outLink in outLinks">
@@ -67,7 +61,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="link-info">
+				<div v-if="inLinks.length > 0" class="link-info">
 					<div class="table">
 						<div class="table-caption">Reçoit de l'argent de ({{inLinks.length}})</div>
 						<div class="table-row" v-for="inLink in inLinks">
