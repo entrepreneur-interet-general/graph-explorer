@@ -2,7 +2,7 @@
 Explore and find suspicious patterns in a graph of money transactions
 
 ## Demo 
-![screenshot](https://raw.githubusercontent.com/entrepreneur-interet-general/graph-explorer/redesign/docs/img/home.png)
+![screenshot](https://github.com/entrepreneur-interet-general/graph-explorer/raw/master/docs/img/home.png)
 
 ## Installation 
 ```
