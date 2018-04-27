@@ -5,80 +5,99 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Graph Explorer</title>
-	<link rel="stylesheet" href="/local/static/graph-explorer/css/bulma.css">
-	<link rel="stylesheet" href="/local/static/graph-explorer/css/style.css">
-	<link href="/local/static/graph-explorer/css/roboto.css" rel="stylesheet">
-	<script defer src="/local/static/graph-explorer/js/fontawesome.js"></script>
-	<script type="text/javascript" src="/local/static/graph-explorer/js/jquery-3.3.1.min.js"></script>
-	<script type="text/javascript" src="/local/static/graph-explorer/js/d3.v4.js"></script>
-	<script type="text/javascript" src="/local/static/graph-explorer/js/vue.js"></script>
 </head>
 
 <body>
-	<div id=app>
-		<div class="loader" v-show="isLoading"></div>
-		<div class="columns" v-show="isReady">
-			<div id="sidenav" class="column is-one-fifth">
-				<label class="label left-margin is-size-6">Choisir un dataset:</label>
-				<div class="control left-margin">
-					<div class="select is-normal">
-						<select v-model="dataset" style="width: 200px;">
-							<option value="default" selected>Sélectionner</option>
-							<option :value="dataset.id" v-for="dataset in datasets">
-								{{ dataset.name }}
-							</option>
-						</select>
-					</div>
+	<!-- Load external libraries. This is done inside the <body> tag to quickly export it 
+		into a Dataiku web app environment where we only define the body -->
+	<link href="/local/static/graph-explorer/css/roboto.css" rel="stylesheet">
+	<link href="/local/static/graph-explorer/css/material-icons.css" rel="stylesheet">
+	<script type="text/javascript" src="/local/static/graph-explorer/js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="/local/static/graph-explorer/js/d3.v4.js"></script>
+	<script type="text/javascript" src="/local/static/graph-explorer/js/vue.js"></script>
+	<script type="text/javascript" src="/local/static/graph-explorer/js/utils.js"></script>
+
+	<!-- container mounted by Vue.js -->
+	<div id="app">
+
+		<!-- Top navigation bar containing a dropdown menu and a search bar  -->
+		<div class="navbar">
+			<div class="dropdown" @mouseleave="closeDropdown" @mouseover="openDropdown">
+				<span class="dropdown-selection" :value="datasetSelected.id">{{ datasetSelected.name }} </span>
+				<div class="dropdown-caret">
+					<i class="material-icons">expand_more</i>
 				</div>
-				<div v-show="dataset != 'default'">
-					<div class="control left-margin">
-						<div>
-							<input type="radio" name="optionsRadios" id="optionsRadio1" value="topBen" v-model="picked">
-							<label class="is-size-6" for="optionsRadio1" class="radio"> Top bénéficiaires </label>
-						</div>
-						<div>
-							<input type="radio" name="optionsRadios" id="optionsRadio2" value="topDon" v-model="picked">
-							<label class="is-size-6" for="optionsRadio2" class="radio">Top donneurs</label>
-						</div>
-					</div>
-					<label class="label left-margin is-size-6">Enquêter sur:</label>
-					<div class="control left-margin">
-						<div class="select is-normal">
-							<select v-model="selected" style="width: 200px;">
-								<option value="default" selected>Sélectionner</option>
-								<option :value="don.entity" v-if="picked == 'topDon'" v-for="don in topDonneurs">
-									{{ don.prenom_nom }}
-								</option>
-								<option :value="ben.entity" v-if="picked == 'topBen'" v-for="ben in topBeneficiaries">
-									{{ ben.prenom_nom }}
-								</option>
-							</select>
-						</div>
-					</div>
-					<div class="information" v-bind:style="{ 'background-color': infoBackgroundColor }" v-if="isNodeHovered">
-						<div class="left-margin">
-							<div>{{ nodeHovered.prenom_nom }} </div>
-							<div> {{ nodeHovered.pays }} </div>
-							<div> {{ nodeHovered.code_postal }} </div>
-						</div>
-					</div>
-					<div class="container-fluid information" style="background-color: var(--asbestos);" v-if="isLinkHovered">
-						<div class="left-margin">
-							<div v-for="transaction in linkHovered.transactions">
-								{{ transaction.valeur_euro + " €"}}
-							</div>
-						</div>
+				<div id="dropdown-content" class="dropdown-content" v-bind:style="{display: dropdownContentDisplay}">
+					<div class="dropdown-item" v-for="dataset in datasets" :value="dataset.id" v-on:click="handleDropdownItemClicked">
+						{{dataset.name}}
 					</div>
 				</div>
 			</div>
-			<!-- Add all page content inside this div -->
-			<div id="main" class="column">
+			<div class="search">
+				<input id="search-input" type="text" placeholder="Rechercher dans le graphe" autofocus v-model="searchPattern" v-on:focus="handleSearchInputFocus">
+				<i class="material-icons ic-search">search</i>
+				<i class="material-icons ic-close" v-on:click="clearSearch">clear</i>
+				<div class="search-suggestion-content">
+					<div class="search-suggestion-item" v-for="suggestion in searchSuggestions">
+						<div :value="suggestion.entity" v-on:click="handleSearchSuggestionClicked">{{ suggestion.prenom_nom }}</div>
+						<i class="material-icons ic-person">person</i>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- The main content of the window containing a collapsable drawer 
+			on the left and a graph container on the right-->
+		<div class="main">
+			<div class="drawer" v-bind:style="drawerStyle">
+				<div class="identity-card" v-bind:style="identityCardStyle">
+					<div class="name">
+						{{focusNode ? focusNode.prenom_nom : ''}}
+					</div>
+					<div class="table">
+						<div class="table-row">
+							<label class="table-cell" for="nationality">Adresse:</label>
+							<span class="table-cell" id="nationality">
+								{{focusNode ? focusNode.pays + " (" + focusNode.code_postal + ")" : ''}}
+							</span>
+						</div>
+					</div>
+				</div>
+				<div v-if="outLinks.length > 0" class="link-info">
+					<div class="table">
+						<div class="table-caption">Envoie de l'argent à ({{outLinks.length}})</div>
+						<div class="table-row" v-for="outLink in outLinks">
+							<div class="table-cell">{{outLink.target.prenom_nom}}</div>
+							<div class="table-cell">{{Math.round(outLink.valeur_euro) + "€"}}</div>
+							<div class="table-cell detail" v-on:click="openModal(outLink)">Detail</div>
+						</div>
+					</div>
+				</div>
+				<div v-if="inLinks.length > 0" class="link-info">
+					<div class="table">
+						<div class="table-caption">Reçoit de l'argent de ({{inLinks.length}})</div>
+						<div class="table-row" v-for="inLink in inLinks">
+							<div class="table-cell">{{inLink.source.prenom_nom}}</div>
+							<div class="table-cell">{{Math.round(inLink.valeur_euro) + "€"}}</div>
+							<div class="table-cell detail" v-on:click="openModal(inLink)">Detail</div>
+						</div>
+					</div>
+				</div>
+				<button class="drawer-button" v-on:click="handleDrawerButtonClicked" v-bind:style="{'margin-left': drawerExpanded ?  '355px': '0px' }">
+					<div v-bind:class="[arrowClass]"></div>
+				</button>
+			</div>
+
+			<!-- Graph container  -->
+			<div class="graph-container">
 				<svg id="svg">
 					<defs>
 						<marker id="arrowhead" viewBox="-0 -5 10 10" refX="20" refY="0" orient="auto" markerWidth="3" markerHeight="3" xoverflow="visbile">
 							<path d="M 0,-5 L 10, 0 L 0, 5" fill="var(--grey)" opacity="0.2" stroke="none;"></path>
 						</marker>
 					</defs>
+					<!-- Main containers for the d3.js force directed graph. 
+						They will be populated dynamically by d3.js -->
 					<g class="graph">
 						<g class="links"></g>
 						<g class="edgepaths"></g>
@@ -89,8 +108,41 @@
 				</svg>
 			</div>
 		</div>
+
+		<!-- The modal that opens when clicking on the "detail" link -->
+		<div id="details-modal" class="modal" v-bind:style="{display: detailsModalDisplay}">
+			<div class="modal-content">
+				<span class="close" v-on:click="closeModal">
+					<i class="material-icons ic-close">clear</i>
+				</span>
+				<div class="link-summary">
+					<span class="sender">{{ linkDetail ? linkDetail.source.prenom_nom : ''}}</span>
+					<span>
+						<i class="material-icons">arrow_forward</i>
+					</span>
+					<span class="receiver">{{ linkDetail ? linkDetail.target.prenom_nom : ''}}</span>
+				</div>
+				<table>
+					<tr>
+						<th>Date</th>
+						<th>Montant</th>
+					</tr>
+					<tr v-for="transaction in (linkDetail ? linkDetail.transactions : [])">
+						<td>bientot_disponible</td>
+						<td>{{Math.round(transaction.valeur_euro) + " €"}}</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+
+		<!-- The loader -->
+		<div class="loader" v-bind:style="{display: loaderDisplay}"></div>
 	</div>
-	<script type="text/javascript" src="/local/static/graph-explorer/js/app.js"></script>
 </body>
+
+<!-- Load style.css and app.js after the <body> tag. In a Dataiku web app environement, they would
+	be loaded automatically -->
+<link rel="stylesheet" href="/local/static/style.css">
+<script type="text/javascript" src="/local/static/app.js"></script>
 
 </html>
