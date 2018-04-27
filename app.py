@@ -5,6 +5,7 @@ import networkx as nx
 
 app = Flask(__name__, static_folder="local/static")
 
+# Dummy datasets 
 datasets = {
     "dataset_1": {
         "name": "Dataset 1",
@@ -29,13 +30,6 @@ for k, dataset in datasets.items():
 
     dataset["graph"] = G 
     
-    dataset["top_30_beneficiaries"] = sorted(
-        [G.node[n] for n in G], reverse=True, key=lambda x: x["in_degree"])[:30]
-
-    dataset["top_30_donneurs"] = sorted(
-        [G.node[n] for n in G], reverse=True, key=lambda x: x["out_degree"])[:30]
-        
-
 @app.route("/")
 def home():
     return app.send_static_file('index.html')

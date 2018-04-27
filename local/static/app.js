@@ -1,24 +1,26 @@
 var app = new Vue({
   el: '#app',
   data: {
-    datasets: [],
-    datasetSelected: { id: "", name: "" },
-    dropdownContentDisplay: "none",
-    drawerExpanded: true,
-    loaderDisplay: "block",
-    detailsModalDisplay: "none",
-    searchPattern: "",
-    searchSuggestions: [],
-    searchEntity: null,
-    focusNode: null,
-    diGraph: {},
-    linkDetail: null
+    datasets: [], /* the list of datasets */
+    datasetSelected: { id: "", name: "" },  /* the dataset selected in the dropdown */
+    dropdownContentDisplay: "none", /* used to toggle the dropdown  */
+    drawerExpanded: true, /* used to expand or collapse the dropdown */
+    loaderDisplay: "block", /* used to display or hide the loader */
+    detailsModalDisplay: "none", /* used to display or hide the "Details" modal */
+    searchPattern: "", /* bind to the content of the search input */
+    searchSuggestions: [], /* a list of at most 5 search suggestions matching the searchPattern */
+    searchEntity: null, /* this is set when selecting a search suggestion */
+    focusNode: null, /* the node under focus. Nodes can be focused with a simple click */
+    diGraph: {}, /* all the nodes and links contained in the connected component of searchEntity */
+    linkDetail: null /* information used in the "Details" modal */
   },
   computed: {
+    // class used in the drawer button to change the direction of the arrow
     arrowClass: function () {
       return this.drawerExpanded ? "arrow-left" : "arrow-right";
     },
-    drawerStyle: function() {
+    // style of the collapsable drawer
+    drawerStyle: function () {
       var drawerWidth = this.drawerExpanded ? "355px" : "0px";
       var drawerDisplay = this.focusNode ? "block" : "none";
       return {
@@ -27,36 +29,39 @@ var app = new Vue({
         "max-width": drawerWidth
       }
     },
-    identityCardStyle: function(){
+    // style of the container displaying the name and address of the node under focus 
+    identityCardStyle: function () {
       var backgroundColor = this.focusNode ?
         this.focusNode.entity == this.searchEntity ?
-          "var(--pomegranate)" : 
+          "var(--pomegranate)" :
           "var(--peter-river)" : {};
       return { "background-color": backgroundColor };
     },
-    outLinks: function(){
+    // return all the outbound links of the node under focus 
+    outLinks: function () {
       var vm = this;
       if (vm.diGraph && vm.focusNode) {
-        var links = vm.diGraph.links.filter(function(link){
+        var links = vm.diGraph.links.filter(function (link) {
           return vm.source(link) == vm.focusNode.entity;
         });
-        return links.map(function(link){
-          link.source = typeof(link.source) === 'object' ? link.source : vm.getNode(link.source);
-          link.target = typeof(link.target) === 'object' ? link.target : vm.getNode(link.target);
+        return links.map(function (link) {
+          link.source = typeof (link.source) === 'object' ? link.source : vm.getNode(link.source);
+          link.target = typeof (link.target) === 'object' ? link.target : vm.getNode(link.target);
           return link;
         });
       }
       return [];
     },
-    inLinks: function(){
+    // returns all the inbound links of the node under focus 
+    inLinks: function () {
       var vm = this;
       if (vm.diGraph && vm.focusNode) {
-        var links = vm.diGraph.links.filter(function(link){
+        var links = vm.diGraph.links.filter(function (link) {
           return vm.target(link) == vm.focusNode.entity;
         })
-        return links.map(function(link){
-          link.source = typeof(link.source) === 'object' ? link.source : vm.getNode(link.source);
-          link.target = typeof(link.target) === 'object' ? link.target : vm.getNode(link.target);
+        return links.map(function (link) {
+          link.source = typeof (link.source) === 'object' ? link.source : vm.getNode(link.source);
+          link.target = typeof (link.target) === 'object' ? link.target : vm.getNode(link.target);
           return link;
         });
       }
@@ -64,11 +69,15 @@ var app = new Vue({
     }
   },
   watch: {
+    // call the /search endpoint as the user types.
+    // the api calls are debounced (see utils.js) 
     searchPattern: debounce(function () {
-      if (document.activeElement.id == "search-input"){
+      if (document.activeElement.id == "search-input") {
         this.search();
       }
     }, 300),
+    // call the /connected_component endpoint when the person were are searching 
+    // changes and redraw the graph 
     searchEntity: function (entity) {
       this.loaderDisplay = "block";
       if (this.simulation) {
@@ -92,7 +101,7 @@ var app = new Vue({
         vm.diGraph = vm.expand(vm.diGraph, vm.searchEntity);
 
         // search the node corresponding to the search entity
-        vm.focusNode = vm.diGraph.nodes.find(function(node){
+        vm.focusNode = vm.diGraph.nodes.find(function (node) {
           return node.entity == entity;
         })
 
@@ -100,23 +109,28 @@ var app = new Vue({
         vm.draw();
       })
     },
-    focusNode: function(){
+    // change the opacity of the nodes when we click a different one
+    focusNode: function () {
       var vm = this;
-      vm.node.attr("opacity", function(node){
-        return node.entity == vm.focusNode.entity ? 0.9: 0.5;
+      vm.node.attr("opacity", function (node) {
+        return node.entity == vm.focusNode.entity ? 0.9 : 0.5;
       })
     }
   },
+  // this code is executed once Vue.js has mounted <div id="#app">
   mounted: function () {
     var datasetsUrl = typeof (getWebAppBackendUrl) === 'undefined' ? "/datasets" : getWebAppBackendUrl('datasets');
     var vm = this;
-    $.getJSON(datasetsUrl, function (datasets) {
+    
+    /* get a list of available datasets*/
+    $.getJSON(datasetsUrl, function (datasets) { 
       vm.datasets = datasets;
       vm.datasetSelected = vm.datasets[0]
       vm.loaderDisplay = "none";
     })
     window.addEventListener("click", this.handleWindowClicked);
 
+    /* bind variables to the graph containers, they are used in the "draw" function */
     this.svg = d3.select("svg");
     this.graph = d3.select(".graph");
     this.link = d3.select(".links").selectAll(".link");
@@ -125,12 +139,13 @@ var app = new Vue({
     this.node = d3.select(".nodes").selectAll(".node");
     this.text = d3.select('.nodelabels').selectAll(".nodelabel");
     this.svg.call(d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed)).on("dblclick.zoom", null);
-    
+
   },
   beforeDestroy: function () {
     window.removeEventListener("click", this.handleWindowClicked);
   },
   methods: {
+    // returns the size of the svg element
     getSvgSize: function () {
       var svg = document.getElementById("svg")
       var boundingClientRect = svg.getBoundingClientRect()
@@ -155,6 +170,7 @@ var app = new Vue({
       d.fx = null;
       d.fy = null;
     },
+    // this method is called by the force directed simulation to change the layout
     ticked: function () {
       var vm = this;
       vm.link
@@ -211,15 +227,15 @@ var app = new Vue({
       this.searchPattern = event.target.textContent;
       this.searchSuggestions = [];
     },
-    clearSearch: function(event) {
+    clearSearch: function (event) {
       this.searchPattern = "";
       this.searchSuggestions = [];
     },
-    handleSearchInputFocus: function(){
+    handleSearchInputFocus: function () {
       this.search();
     },
-    openModal: function(link) {
-      this.linkDetail = link; 
+    openModal: function (link) {
+      this.linkDetail = link;
       this.detailsModalDisplay = "block";
     },
     closeModal: function () {
@@ -239,7 +255,7 @@ var app = new Vue({
         vm.searchSuggestions = suggestions;
       })
     },
-    handleNodeClicked: function(n){
+    handleNodeClicked: function (n) {
       this.focusNode = n;
     },
     source: function (link) {
@@ -251,11 +267,12 @@ var app = new Vue({
     target: function (link) {
       return typeof (link.target) === 'object' ? link.target.entity : link.target
     },
-    getNode: function(entity){
-      return this.diGraph.nodes.find(function(n) {
+    getNode: function (entity) {
+      return this.diGraph.nodes.find(function (n) {
         return n.entity == entity;
       })
     },
+    // Deactivates all nodes 
     collapseAll: function (graph) {
       var collapsedGraph = {};
       collapsedGraph.nodes = graph.nodes.map(function (node) {
@@ -268,8 +285,8 @@ var app = new Vue({
       });
       return collapsedGraph;
     },
+    // expand the graph around a node
     expand: function (graph, node) {
-      // expand the graph around a node
       var expandedGraph = {};
       var neighbors = [];
       var vm = this;
@@ -294,10 +311,6 @@ var app = new Vue({
       })
       return expandedGraph;
     },
-    collapse: function (graph, node) {
-      var vm = this;
-      var collapsedGraph = {};
-    },
     expandOrCollapse: function (n) {
       var vm = this;
       if (n.expanded) {
@@ -308,6 +321,7 @@ var app = new Vue({
       }
       vm.draw();
     },
+    // this function does all the d3 magic. See d3.js update pattern to understand how it works
     draw: function () {
 
       var vm = this;
@@ -398,8 +412,8 @@ var app = new Vue({
         .attr("fill", function (d) {
           return d.id == vm.searchEntity ? "var(--pomegranate)" : "var(--peter-river)";
         })
-        .attr("opacity", function(node){
-          return node.entity == vm.focusNode.entity ? 1.0: 0.5;
+        .attr("opacity", function (node) {
+          return node.entity == vm.focusNode.entity ? 1.0 : 0.5;
         })
         .call(function (node) { node.transition().attr("r", 3); })
         .on("click", vm.handleNodeClicked)
