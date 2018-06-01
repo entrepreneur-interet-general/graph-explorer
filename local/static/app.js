@@ -112,7 +112,10 @@ var app = new Vue({
     // change the opacity of the nodes when we click a different one
     focusNode: function () {
       var vm = this;
-      vm.node.attr("opacity", function (node) {
+      vm.circles.attr("opacity", function (node) {
+        return node.entity == vm.focusNode.entity ? 0.9 : 0.5;
+      })
+      vm.stars.attr("opacity", function (node) {
         return node.entity == vm.focusNode.entity ? 0.9 : 0.5;
       })
     }
@@ -133,11 +136,12 @@ var app = new Vue({
     /* bind variables to the graph containers, they are used in the "draw" function */
     this.svg = d3.select("svg");
     this.graph = d3.select(".graph");
-    this.link = d3.select(".links").selectAll(".link");
+    this.links = d3.select(".links").selectAll(".link");
     this.edgepaths = d3.select(".edgepaths").selectAll(".edgepath");
     this.edgelabels = d3.select(".edgelabels").selectAll(".edgelabel");
-    this.node = d3.select(".nodes").selectAll(".node");
-    this.text = d3.select('.nodelabels').selectAll(".nodelabel");
+    this.circles = d3.select(".nodes").selectAll(".circle");
+    this.stars = d3.select(".nodes").selectAll(".star")
+    this.nodelabels = d3.select('.nodelabels').selectAll(".nodelabel");
     this.svg.call(d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed)).on("dblclick.zoom", null);
 
   },
@@ -150,6 +154,26 @@ var app = new Vue({
       var svg = document.getElementById("svg")
       var boundingClientRect = svg.getBoundingClientRect()
       return { width: boundingClientRect.width, height: boundingClientRect.height };
+    },
+    // get the coordinates of a 5 branch stars
+    getStarCoordinates: function(center, innerRadius, outerRadius){
+      var branches = 5;
+      var coordinates = [];
+      var theta = 0;
+      for (var i = 0; i < 2 * branches; i++) {
+        if (i % 2 == 0) {
+          // outer circle
+          var x = center.x + outerRadius * Math.cos(theta);
+          var y = center.y + outerRadius * Math.sin(theta);
+        } else {
+          // inner circle
+          var x = center.x + innerRadius * Math.cos(theta);
+          var y = center.y + innerRadius * Math.sin(theta);
+        }
+        coordinates.push({x: x, y: y})
+        theta = theta + Math.PI / branches;
+      }
+      return coordinates;
     },
     zoomed: function () {
       if (this.graph) {
@@ -173,17 +197,26 @@ var app = new Vue({
     // this method is called by the force directed simulation to change the layout
     ticked: function () {
       var vm = this;
-      vm.link
+      vm.links
         .attr("x1", function (d) { return d.source.x; })
         .attr("y1", function (d) { return d.source.y; })
         .attr("x2", function (d) { return d.target.x; })
         .attr("y2", function (d) { return d.target.y; });
 
-      vm.node
+      vm.circles
         .attr("cx", function (d) { return d.x; })
         .attr("cy", function (d) { return d.y; });
 
-      vm.text
+      vm.stars
+        .attr("points", function(d) {
+          var center = { x: d.x, y: d.y };
+          var coordinates = vm.getStarCoordinates(center, 2, 5);
+          return coordinates.map(function(p){
+            return [p.x, p.y].join(",");
+          }).join(" ");
+        })
+
+      vm.nodelabels
         .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")" })
 
       vm.edgepaths.attr('d', function (d) {
@@ -328,6 +361,8 @@ var app = new Vue({
 
       var activeLinks = vm.diGraph.links.filter(function (link) { return link.active; });
       var activeNodes = vm.diGraph.nodes.filter(function (node) { return node.active; });
+      var circleNodes = activeNodes.filter(function(node) { return !node.star })
+      var starNodes = activeNodes.filter(function(node) { return node.star })
 
       function linkKey(link) {
         return vm.source(link) + "-" + vm.target(link);
@@ -337,9 +372,9 @@ var app = new Vue({
         return node.entity;
       }
 
-      vm.link = vm.link.data(activeLinks, linkKey);
+      vm.links = vm.links.data(activeLinks, linkKey);
 
-      vm.link
+      vm.links
         .exit()
         .transition()
         .attr("stroke-opacity", 0)
@@ -349,7 +384,7 @@ var app = new Vue({
         .attrTween("y2", function (d) { return function () { return d.target.y; } })
         .remove();
 
-      var newLinks = vm.link.enter()
+      var newLinks = vm.links.enter()
         .append("line")
         .call(function (link) { link.transition().attr("stroke-opacity", 0.2) })
         .attr("class", "link")
@@ -359,7 +394,7 @@ var app = new Vue({
         .on("mouseenter", vm.handleLinkMouseEnter)
         .on("mouseout", vm.handleLinkMouseOut)
 
-      vm.link = newLinks.merge(vm.link);
+      vm.links = newLinks.merge(vm.links);
 
       vm.edgepaths = vm.edgepaths.data(activeLinks, linkKey)
 
@@ -402,11 +437,11 @@ var app = new Vue({
       vm.edgelabels.select("textPath")
         .attr('xlink:href', function (d, i) { return '#edgepath' + i })
 
-      vm.node = vm.node.data(activeNodes, nodeKey);
+      vm.circles = vm.circles.data(circleNodes, nodeKey);
 
-      vm.node.exit().transition().attr("r", 0).remove();
+      vm.circles.exit().transition().attr("r", 0).remove();
 
-      var newNode = vm.node.enter()
+      var newCircles = vm.circles.enter()
         .append("circle")
         .attr("class", "node")
         .attr("fill", function (d) {
@@ -423,13 +458,35 @@ var app = new Vue({
           .on("drag", vm.dragged)
           .on("end", vm.dragended));
 
-      vm.node = newNode.merge(vm.node);
+      vm.circles = newCircles.merge(vm.circles);
 
-      vm.text = vm.text.data(activeNodes, nodeKey);
+      vm.stars = vm.stars.data(starNodes, nodeKey);
 
-      vm.text.exit().remove();
+      vm.stars.exit().remove();
 
-      var newText = vm.text
+      var newStars= vm.stars.enter()
+        .append("polygon")
+        .attr("class", "triangle")
+        .attr("fill", function (d) {
+          return d.id == vm.searchEntity ? "var(--pomegranate)" : "var(--peter-river)";
+        })
+        .attr("opacity", function (node) {
+          return node.entity == vm.focusNode.entity ? 1.0 : 0.5;
+        })
+        .on("click", vm.handleNodeClicked)
+        .on("dblclick", vm.expandOrCollapse)
+        .call(d3.drag()
+          .on("start", vm.dragstarted)
+          .on("drag", vm.dragged)
+          .on("end", vm.dragended));
+
+      vm.stars = newStars.merge(vm.stars);
+
+      vm.nodelabels = vm.nodelabels.data(activeNodes, nodeKey);
+
+      vm.nodelabels .exit().remove();
+
+      var newNodeLabels = vm.nodelabels 
         .enter()
         .append("g")
         .attr("class", "nodelabel")
@@ -440,7 +497,7 @@ var app = new Vue({
           .on("drag", vm.dragged)
           .on("end", vm.dragended))
 
-      newText.append("text")
+      newNodeLabels.append("text")
         .attr("x", 0)
         .attr("y", 0)
         .style("text-anchor", "middle")
@@ -451,7 +508,7 @@ var app = new Vue({
           return label;
         })
 
-      vm.text = newText.merge(vm.text)
+      vm.nodelabels = newNodeLabels.merge(vm.nodelabels)
 
       vm.simulation
         .nodes(activeNodes)
