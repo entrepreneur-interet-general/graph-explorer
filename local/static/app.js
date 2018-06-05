@@ -25,8 +25,14 @@ var app = new Vue({
       var drawerDisplay = this.focusNode ? "block" : "none";
       return {
         "display": drawerDisplay,
-        "min-width": drawerWidth,
-        "max-width": drawerWidth
+        "width": drawerWidth,
+      }
+    },
+    // style of the drawer button
+    drawerButtonStyle: function(){
+      return {
+        "display": this.focusNode ? "flex" : "none",
+        "margin-left": this.drawerExpanded ? "356px" : "0px"
       }
     },
     // style of the container displaying the name and address of the node under focus 
@@ -36,6 +42,11 @@ var app = new Vue({
           "var(--pomegranate)" :
           "var(--peter-river)" : {};
       return { "background-color": backgroundColor };
+    },
+    widgetZoomStyle: function(){
+      return {
+        "display": this.focusNode ? "block" : "none"
+      }
     },
     // return all the outbound links of the node under focus 
     outLinks: function () {
@@ -89,7 +100,7 @@ var app = new Vue({
         vm.simulation = d3.forceSimulation()
           .force("link", d3.forceLink().id(function (d) { return d.id; }).distance(50))
           .force("charge", d3.forceManyBody())
-          .force("center", d3.forceCenter((svgSize.width - 355) / 2, svgSize.height / 2))
+          .force("center", d3.forceCenter(svgSize.width / 2, svgSize.height / 2))
       }
 
       var networkUrl = this.getNetworkUrl();
@@ -149,6 +160,7 @@ var app = new Vue({
     this.nodelabels = d3.select('.nodelabels').selectAll(".nodelabel");
     this.zoom = d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed)
     this.svg.call(this.zoom).on("dblclick.zoom", null);
+    this.zoom.scaleTo(this.svg.transition(), 2.5);
   },
   beforeDestroy: function () {
     window.removeEventListener("click", this.handleWindowClicked);
@@ -190,6 +202,10 @@ var app = new Vue({
     },
     zoomOut: function(){
       this.zoom.scaleBy(this.svg.transition().duration(200), 1 / 1.2);
+    },
+    zoomReset: function(){
+      app.svg.call(app.zoom.transform, d3.zoomIdentity);
+      this.zoom.scaleTo(this.svg.transition(), 2.5);
     },
     dragstarted: function (d) {
       if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();

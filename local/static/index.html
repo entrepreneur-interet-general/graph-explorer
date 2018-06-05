@@ -49,6 +49,7 @@
 		<!-- The main content of the window containing a collapsable drawer 
 			on the left and a graph container on the right-->
 		<div class="main">
+
 			<div class="drawer" v-bind:style="drawerStyle">
 				<div class="identity-card" v-bind:style="identityCardStyle">
 					<div class="name">
@@ -83,10 +84,10 @@
 						</div>
 					</div>
 				</div>
-				<button class="drawer-button" v-on:click="handleDrawerButtonClicked" v-bind:style="{'margin-left': drawerExpanded ?  '355px': '0px' }">
-					<div v-bind:class="[arrowClass]"></div>
-				</button>
 			</div>
+			<button class="drawer-button" v-on:click="handleDrawerButtonClicked" v-bind:style="drawerButtonStyle">
+				<div v-bind:class="[arrowClass]"></div>
+			</button>
 
 			<!-- Graph container  -->
 			<div class="graph-container">
@@ -110,13 +111,16 @@
 		</div>
 
 		<!-- Zoom in/out buttons -->
-		<div class="widget-zoom">
+		<div class="widget-zoom" v-bind:style='widgetZoomStyle'>
+			<button id="widget-zoom-in" v-on:click="zoomReset"> 
+				<i class="material-icons">zoom_out_map</i>
+			</button>
 			<button id="widget-zoom-in" v-on:click="zoomIn"> 
 				<i class="material-icons">add</i>
 			</button>
 			<button id="widget-zoom-in">
-					<i class="material-icons" v-on:click="zoomOut">remove</i>
-				</button>
+				<i class="material-icons" v-on:click="zoomOut">remove</i>
+			</button>
 		</div>
 
 

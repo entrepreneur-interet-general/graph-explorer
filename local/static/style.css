@@ -62,8 +62,6 @@ button {
     padding-top: var(--navbar-height);
     box-sizing: border-box;
     height: 100%;
-    display: flex;
-    flex-direction: row;
 }
 
 .dropdown {
@@ -218,14 +216,17 @@ button {
 }
 
 .drawer {
-    max-width: var(--dropdown-width); /* same width as the dropdown */
-    min-width: var(--dropdown-width); /* same width as the dropdown */
+    position: absolute;
+    height: 100%;
     z-index: 1; 
     overflow-x: hidden; 
     transition: 0.1s; 
     border-right: solid var(--silver) 1px;
     border-left: solid var(--silver) 1px;
+    transition: width 0.3s;
+    background-color: white;
 }
+
 
 .drawer > * {
     overflow-x: hidden;
@@ -237,12 +238,11 @@ button {
     top: 110px;
     height: 35px;
     width: 15px;
-    background-color: var(--silver);
-    display: flex;
+    background-color: var(--silver); 
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: margin-left 0.1s;
+    transition: margin-left 0.3s;
     z-index: 1;
 }
 
@@ -399,14 +399,14 @@ button {
     border-collapse: collapse;
 }
 
-
 .graph-container {
+    height: 100%;
     width: 100%;
 }
 
 .graph-container svg {
-    width: 100%;
     height: 100%;
+    width: 100%;
 }
 
 .loader {
@@ -444,19 +444,33 @@ button {
     position: relative;
 }
 
-.widget-zoom button:first-child {
+
+.widget-zoom button:first-child  {
+    border: solid 1px;
+    margin-bottom: 5px;
+}
+
+.widget-zoom button:nth-child(2)  {
     border: solid 1px;
 }
 
-.widget-zoom button:last-child {
+.widget-zoom button:nth-child(3) {
     border-left: solid 1px;
     border-right: solid 1px;
     border-bottom: solid 1px;
 }
 
+.widget-zoom button:hover {
+    cursor: pointer;
+}
+
+.widget-zoom button:hover i {
+    color: var(--turquoise);
+}
 
 .widget-zoom button i {
     position: absolute;
     left: 2px;
     top: 2px;
 }
+
