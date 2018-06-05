@@ -79,20 +79,24 @@ var app = new Vue({
     // call the /connected_component endpoint when the person were are searching 
     // changes and redraw the graph 
     searchEntity: function (entity) {
+      var vm = this;
       this.loaderDisplay = "block";
-      if (this.simulation) {
-        this.simulation.stop();
+      
+      if (vm.simulation) {
+        vm.simulation.stop();
       } else {
-        var svgSize = this.getSvgSize();
-        this.simulation = d3.forceSimulation()
+        var svgSize = vm.getSvgSize();
+        vm.simulation = d3.forceSimulation()
           .force("link", d3.forceLink().id(function (d) { return d.id; }).distance(50))
           .force("charge", d3.forceManyBody())
           .force("center", d3.forceCenter((svgSize.width - 355) / 2, svgSize.height / 2))
       }
+
       var networkUrl = this.getNetworkUrl();
-      var vm = this;
       vm.diGraph = { links: [], nodes: [] };
+
       vm.draw();
+
       $.getJSON(networkUrl, function (response) {
         vm.isLoading = false;
         // de-activate all nodes and links by default
@@ -106,6 +110,7 @@ var app = new Vue({
         })
 
         vm.loaderDisplay = "none";
+        
         vm.draw();
       })
     },
@@ -142,8 +147,8 @@ var app = new Vue({
     this.circles = d3.select(".nodes").selectAll(".circle");
     this.stars = d3.select(".nodes").selectAll(".star")
     this.nodelabels = d3.select('.nodelabels').selectAll(".nodelabel");
-    this.svg.call(d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed)).on("dblclick.zoom", null);
-
+    this.zoom = d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed)
+    this.svg.call(this.zoom).on("dblclick.zoom", null);
   },
   beforeDestroy: function () {
     window.removeEventListener("click", this.handleWindowClicked);
@@ -179,6 +184,12 @@ var app = new Vue({
       if (this.graph) {
         this.graph.attr("transform", d3.event.transform);
       }
+    },
+    zoomIn: function(){
+      this.zoom.scaleBy(this.svg.transition().duration(200), 1.2);
+    },
+    zoomOut: function(){
+      this.zoom.scaleBy(this.svg.transition().duration(200), 1 / 1.2);
     },
     dragstarted: function (d) {
       if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
@@ -517,6 +528,7 @@ var app = new Vue({
       vm.simulation.force("link").links(activeLinks)
 
       vm.simulation.alpha(1).restart()
+
     }
   }
 })

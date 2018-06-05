@@ -109,6 +109,17 @@
 			</div>
 		</div>
 
+		<!-- Zoom in/out buttons -->
+		<div class="widget-zoom">
+			<button id="widget-zoom-in" v-on:click="zoomIn"> 
+				<i class="material-icons">add</i>
+			</button>
+			<button id="widget-zoom-in">
+					<i class="material-icons" v-on:click="zoomOut">remove</i>
+				</button>
+		</div>
+
+
 		<!-- The modal that opens when clicking on the "detail" link -->
 		<div id="details-modal" class="modal" v-bind:style="{display: detailsModalDisplay}">
 			<div class="modal-content">

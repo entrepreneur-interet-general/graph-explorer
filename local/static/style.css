@@ -430,3 +430,33 @@ button {
 .node, .nodelabel {
     cursor: pointer;
 }
+
+.widget-zoom {
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+}
+
+.widget-zoom button {
+    display: block;
+    height: 30px;
+    width: 30px;
+    position: relative;
+}
+
+.widget-zoom button:first-child {
+    border: solid 1px;
+}
+
+.widget-zoom button:last-child {
+    border-left: solid 1px;
+    border-right: solid 1px;
+    border-bottom: solid 1px;
+}
+
+
+.widget-zoom button i {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+}
