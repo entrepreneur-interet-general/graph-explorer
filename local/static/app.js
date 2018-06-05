@@ -160,7 +160,6 @@ var app = new Vue({
     this.nodelabels = d3.select('.nodelabels').selectAll(".nodelabel");
     this.zoom = d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed)
     this.svg.call(this.zoom).on("dblclick.zoom", null);
-    this.zoom.scaleTo(this.svg.transition(), 2.5);
   },
   beforeDestroy: function () {
     window.removeEventListener("click", this.handleWindowClicked);
@@ -385,6 +384,8 @@ var app = new Vue({
     draw: function () {
 
       var vm = this;
+
+      vm.zoomReset();
 
       var activeLinks = vm.diGraph.links.filter(function (link) { return link.active; });
       var activeNodes = vm.diGraph.nodes.filter(function (node) { return node.active; });
