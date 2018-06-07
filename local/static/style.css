@@ -228,11 +228,6 @@ button {
 }
 
 
-.drawer > * {
-    overflow-x: hidden;
-    white-space: nowrap;
-}
-
 .drawer-button {
     position: absolute;
     top: 110px;
@@ -262,28 +257,63 @@ button {
     border-left: 6px solid black;
 }
 
-.identity-card {
-    padding-top: 20px;
-    padding-bottom: 20px;
-    color: white;
+.focus-node-label {
+    background-color: var(--clouds);
+    height: 100px;
+    display: flex;
+    align-items: center; 
+    font-size: 1.3em;
 }
 
-.name {
-    font-size: 2em;
-    text-indent: 15px; 
-    color: white;
+.focus-node-label > div {
+    max-width: 355px;
+    padding-left: 15px;
+    padding-right: 15px; 
+}
+
+.focus-node-label > div > span:last-child {
+    color: var(--concrete);
+}
+
+.focus-node-controls {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    border-bottom: solid 1px var(--clouds);
+}
+
+.focus-node-controls > div {
+    margin: auto;
+}
+
+.focus-node-controls > div > button * {
+    font-size: 1.5em;
+}
+
+.focus-node-controls > div > button:hover * {
+    color: var(--turquoise);
+}
+
+.focus-node-controls > div > button:hover {
+    cursor: pointer;
+}
+
+.focus-node-properties {
+    border-bottom: solid 1px var(--clouds); 
+    padding: 5px;
 }
 
 .table {
     display: table;
     border-collapse: separate;
-    margin-top: 10px;
-    border-spacing: 10px;
+    border-spacing: 10px ; 
     width: 100%;
 }
 
 .table-row {
     display: table-row;
+    width: 100%;
+    padding:0;
 }
 
 .table-cell {
@@ -291,21 +321,13 @@ button {
     overflow: hidden;
     white-space: nowrap;
     max-width: 130px;
-}
-
-.table-row .table-cell:first-child {
-    padding-left: 10px;
-}
-
-.table-row .table-cell:last-child {
-    padding-right: 10px;
+    font-size: 0.8em;
 }
 
 .table-caption {
     display: table-caption;
     text-decoration: none;
     position: relative;
-    padding-left: 20px;
     position: relative;
     width: 100%;
 }
@@ -321,21 +343,35 @@ button {
     border-color: var(--clouds);
 }
 
-.link-info {
-    font-size: 0.8em;
-    margin-top: 20px;
-    margin-bottom: 20px;
+.focus-node-links {
+    padding: 5px;
 }
 
-.detail {
-    color: var(--silver);
+.focus-node-links-details {
+    padding-top: 10px; 
+    padding-left: 10px;
+    padding-bottom: 10px;
 }
 
-.detail:hover, .detail:focus {
+.focus-node-links-details > div {
+    display: inline-block;
+}
+
+.focus-node-links-details button {
+    border: solid 1px;
+    display: inline-block;
+    margin-left: 95px;
+    padding: 5px;
+}
+
+.focus-node-links button:hover {
     color: var(--turquoise);
     cursor: pointer;
 }
 
+.focus-node-links .table-cell {
+    text-align: left;
+}
 
 /* The Modal (background) */
 .modal {

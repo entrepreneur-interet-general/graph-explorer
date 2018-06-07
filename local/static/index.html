@@ -50,40 +50,59 @@
 			on the left and a graph container on the right-->
 		<div class="main">
 
-			<div class="drawer" v-bind:style="drawerStyle">
-				<div class="identity-card" v-bind:style="identityCardStyle">
-					<div class="name">
-						{{focusNode ? focusNode.prenom_nom : ''}}
+			<div class="drawer" v-bind:style="drawerStyle" v-if="focusNode">
+				<div class="focus-node-label">
+					<div>
+						<span>{{focusNode.prenom}}</span> 
+						<span>{{focusNode.nom}}</span> 
+						<span>{{"#" + focusNode.entity}}</span>
 					</div>
+				</div>
+				<div class="focus-node-controls">
+					<div>
+						<button>
+							<div><i class="material-icons">unfold_more</i></div>
+							<div>EXPAND</div>
+						</button>
+					</div>
+					<div>
+						<button>
+							<div><i class="material-icons">visibility_off</i></div>
+							<div>HIDE</div>
+						</button>
+					</div>
+					<div>
+						<button>
+							<div><i class="material-icons">unfold_less</i></div>
+							<div>COLLAPSE</div>
+						</button>
+					</div>
+				</div>
+				<div class="focus-node-properties">
 					<div class="table">
-						<div class="table-row">
-							<label class="table-cell" for="nationality">Adresse:</label>
-							<span class="table-cell" id="nationality">
-								{{focusNode ? focusNode.pays + " (" + focusNode.code_postal + ")" : ''}}
+						<div class="table-row" v-for="property in displayableProperties">
+							<label class="table-cell" :for="property.key">{{property.label}}</label>
+							<span class="table-cell" :id="property.key">
+								{{focusNode[property.key]}}
 							</span>
 						</div>
 					</div>
 				</div>
-				<div v-if="outLinks.length > 0" class="link-info">
+				<div class="focus-node-links">
+					<div class="focus-node-links-details">
+						<div>{{focusNode.degree + " links"}}</div>
+						<button>DETAIL</button>
+					</div>
 					<div class="table">
-						<div class="table-caption">Envoie de l'argent à ({{outLinks.length}})</div>
-						<div class="table-row" v-for="outLink in outLinks">
-							<div class="table-cell">{{outLink.target.prenom_nom}}</div>
-							<div class="table-cell">{{Math.round(outLink.valeur_euro) + "€"}}</div>
-							<div class="table-cell detail" v-on:click="openModal(outLink)">Detail</div>
+						<div class="table-row" v-for="link in focusNodeLinks">
+							<span class="table-cell">{{link.source.prenom + " " + link.source.nom}}</span>
+							<i class="table-cell material-icons">arrow_right_alt</i>
+							<span class="table-cell">{{link.target.prenom + " " + link.target.nom}}</span>
 						</div>
 					</div>
 				</div>
-				<div v-if="inLinks.length > 0" class="link-info">
-					<div class="table">
-						<div class="table-caption">Reçoit de l'argent de ({{inLinks.length}})</div>
-						<div class="table-row" v-for="inLink in inLinks">
-							<div class="table-cell">{{inLink.source.prenom_nom}}</div>
-							<div class="table-cell">{{Math.round(inLink.valeur_euro) + "€"}}</div>
-							<div class="table-cell detail" v-on:click="openModal(inLink)">Detail</div>
-						</div>
-					</div>
-				</div>
+
+
 			</div>
 			<button class="drawer-button" v-on:click="handleDrawerButtonClicked" v-bind:style="drawerButtonStyle">
 				<div v-bind:class="[arrowClass]"></div>
@@ -124,29 +143,8 @@
 		</div>
 
 
-		<!-- The modal that opens when clicking on the "detail" link -->
-		<div id="details-modal" class="modal" v-bind:style="{display: detailsModalDisplay}">
-			<div class="modal-content">
-				<span class="close" v-on:click="closeModal">
-					<i class="material-icons ic-close">clear</i>
-				</span>
-				<div class="link-summary">
-					<span class="sender">{{ linkDetail ? linkDetail.source.prenom_nom : ''}}</span>
-					<span>
-						<i class="material-icons">arrow_forward</i>
-					</span>
-					<span class="receiver">{{ linkDetail ? linkDetail.target.prenom_nom : ''}}</span>
-				</div>
-				<table>
-					<tr>
-						<th>Date</th>
-						<th>Montant</th>
-					</tr>
-					<tr v-for="transaction in (linkDetail ? linkDetail.transactions : [])">
-						<td>bientot_disponible</td>
-						<td>{{Math.round(transaction.valeur_euro) + " €"}}</td>
-					</tr>
-				</table>
+		<div class="modal">
+			<div id="test-hot-app" class="modal-content">
 			</div>
 		</div>
 

@@ -12,7 +12,16 @@ var app = new Vue({
     searchEntity: null, /* this is set when selecting a search suggestion */
     focusNode: null, /* the node under focus. Nodes can be focused with a simple click */
     diGraph: {}, /* all the nodes and links contained in the connected component of searchEntity */
-    linkDetail: null /* information used in the "Details" modal */
+    linkDetail: null /* information used in the "Details" modal */,
+    displayableProperties: [
+      {key: "prenom", label: "Prénom"},
+      {key: "nom", label: "Nom"},
+      {key: "date_naissance", label: "Date de naissance"},
+      {key: "pays", label: "Pays"},
+      {key: "code_postal", label: "Code postal"},
+      {key: "telephone", label: "Téléphone"},
+      {key: "numero_piece_identite", label: "ID"}
+    ]
   },
   computed: {
     // class used in the drawer button to change the direction of the arrow
@@ -49,11 +58,11 @@ var app = new Vue({
       }
     },
     // return all the outbound links of the node under focus 
-    outLinks: function () {
+    focusNodeLinks: function () {
       var vm = this;
       if (vm.diGraph && vm.focusNode) {
         var links = vm.diGraph.links.filter(function (link) {
-          return vm.source(link) == vm.focusNode.entity;
+          return vm.source(link) == vm.focusNode.entity || vm.target(link) == vm.focusNode.entity;
         });
         return links.map(function (link) {
           link.source = typeof (link.source) === 'object' ? link.source : vm.getNode(link.source);
@@ -63,21 +72,6 @@ var app = new Vue({
       }
       return [];
     },
-    // returns all the inbound links of the node under focus 
-    inLinks: function () {
-      var vm = this;
-      if (vm.diGraph && vm.focusNode) {
-        var links = vm.diGraph.links.filter(function (link) {
-          return vm.target(link) == vm.focusNode.entity;
-        })
-        return links.map(function (link) {
-          link.source = typeof (link.source) === 'object' ? link.source : vm.getNode(link.source);
-          link.target = typeof (link.target) === 'object' ? link.target : vm.getNode(link.target);
-          return link;
-        });
-      }
-      return [];
-    }
   },
   watch: {
     // call the /search endpoint as the user types.
@@ -160,6 +154,9 @@ var app = new Vue({
     this.nodelabels = d3.select('.nodelabels').selectAll(".nodelabel");
     this.zoom = d3.zoom().scaleExtent([1, 16]).on("zoom", this.zoomed)
     this.svg.call(this.zoom).on("dblclick.zoom", null);
+
+    var vm = this;
+    setTimeout(function(){ vm.searchEntity = 19336}, 500 )
   },
   beforeDestroy: function () {
     window.removeEventListener("click", this.handleWindowClicked);
@@ -472,9 +469,7 @@ var app = new Vue({
       var newCircles = vm.circles.enter()
         .append("circle")
         .attr("class", "node")
-        .attr("fill", function (d) {
-          return d.id == vm.searchEntity ? "var(--pomegranate)" : "var(--peter-river)";
-        })
+        .attr("fill", "var(--peter-river)")
         .attr("opacity", function (node) {
           return node.entity == vm.focusNode.entity ? 1.0 : 0.5;
         })
@@ -532,7 +527,7 @@ var app = new Vue({
         .style("font-size", "2px")
         .style("fill", "black")
         .text(function (d) {
-          var label = d.prenom_nom + " (" + d.degree + ")"
+          var label = d.prenom + " " + d.nom + " " + " (" + d.degree + ")"
           return label;
         })
 
