@@ -1,89 +1,88 @@
+# -*- coding: utf-8 -*-
+
 import json
-from flask import Flask, request, send_from_directory
+from flask import Flask, request, send_from_directory, jsonify
 import networkx as nx
 
+from utils import expand, collapse
 
-app = Flask(__name__, static_folder="local/static")
+app = Flask(__name__, static_folder="dist")
 
-# Dummy datasets 
-datasets = {
-    "dataset_1": {
-        "name": "Dataset 1",
-        "graph_path": "./data/graph.p" 
-    },
-    "dataset_2": {
-        "name": "Dataset 2",
-        "graph_path": "./data/graph.p"
-    },
-    "dataset_3": {
-        "name": "Dataset 3",
-        "graph_path": "./data/graph.p"
-    }
-}
+# Dummy graph
+G = nx.read_gpickle('./data/graph.p')
+for n in G:
+    G.node[n]["degree"] = G.degree(n)
+    G.node[n]["in_degree"] = G.in_degree(n, "valeur_euro")
+    G.node[n]["out_degree"] = G.out_degree(n, "valeur_euro")
 
-for k, dataset in datasets.items():
-    G = nx.read_gpickle(dataset["graph_path"])
-    for n in G:
-        G.node[n]["degree"] = G.degree(n)
-        G.node[n]["in_degree"] = G.in_degree(n, "valeur_euro")
-        G.node[n]["out_degree"] = G.out_degree(n, "valeur_euro")
+# Dummy countries 
+countries = [
+    {"code": "GE", "name": "Allemagne"},
+    {"code": "IT", "name": "Italie"}
+]
 
-    dataset["graph"] = G 
+# Dummy departments
+departments = [
+    {"code": "07", "name": "Ardèche"},
+    {"code": "42", "name": "Loire"}
+]
     
 @app.route("/")
 def home():
     return app.send_static_file('index.html')
 
 
-@app.route('/local/static/<path:path>')
+@app.route('/dist/<path:path>')
 def send_static(path):
-    return send_from_directory('local/static', path)
+    return send_from_directory('dist', path)
 
 
-@app.route('/datasets')
-def get_datasets():
-    """  Returns a list of all available datasets
+@app.route('/countries')
+def get_countries():
+    """  Returns a list of countries
     """
-    data = [ { "id": k, "name": v["name"]} for (k, v) in datasets.items() ]
-    return json.dumps(data)
+    return jsonify(countries)
 
 
-@app.route('/connected_component')
-def network():
-    """ Returns the connected component of node "id" in graph "dataset" (undirected)
-        :param id: The id of the central node 
-        :param dataset: The graph we are interested in
+@app.route('/departments')
+def get_departments():
+    """  Returns a list of departments
     """
+    return jsonify(departments)
 
-    node = int(request.args["id"])
-    dataset_id = request.args["dataset"]
-    dataset = datasets[dataset_id]
-    G = dataset["graph"]
-    G_undirected = G.to_undirected()
-
-    shortest_path = nx.shortest_path(G_undirected, target=node)
-    connected_component = G.subgraph(shortest_path.keys())
-
-    # Output
-    data = nx.node_link_data(connected_component)
-
+@app.route('/subgraph', methods=["POST"])
+def get_subgraph():
+    """ Returns the subgraph for a given set of nodes 
+        :param nodes: a list of nodes 
+        :param expand: a node around which to expand the graph 
+        :param collapse: a node around which to collapse the graph  
+    """
+    payload = request.get_json()
+    nodes = payload.get("nodes", [])
+    expand_node = payload.get("expand_node")
+    collapse_node = payload.get("collapse_node")
+    H = G.subgraph(nodes)
+    if expand_node:
+        H = expand(G, H, expand_node)
+    if collapse_node:
+        H = nx.Graph(H) # create a copy
+        H = collapse(H, collapse_node)
+    data = nx.node_link_data(H)
     return json.dumps({"status": "ok", "data": data})
 
 @app.route('/search')
 def search():
     """ Search for a specific name containing pattern "pattern" in graph "dataset" 
         and returns top 5 suggestions 
-        :param pattern: The pattern we are searching 
-        :param dataset: The graph we are interested in
+        :param search_term: The pattern we are searching 
+        :param filters: A list of filters 
     """
-    pattern = request.args["pattern"]
+    search_term = request.args["search_term"]
     data = []
-    if pattern:
-        pattern = pattern.lower()
-        dataset_id = request.args["dataset"]
-        dataset = datasets[dataset_id]
-        G = dataset["graph"]
+    if search_term:
+        search_term = search_term.lower()
         nodes = [G.node[n] for n in G]
+        # TODO apply filter
         # match if contains substring 
-        data = [node for node in nodes if pattern in node['prenom_nom'].lower()][:5]
+        data = [node for node in nodes if search_term in node['prenom_nom'].lower()][:10]
     return json.dumps(data)

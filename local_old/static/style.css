@@ -1,0 +1,512 @@
+
+html {
+    /* Declare a color palette based on http://designmodo.github.io/Flat-UI/ */
+    --turquoise: #1ABC9C;
+    --green-sea: #16A085;
+    --emerald: #2ECC71;
+    --nephritis: #27AE60;
+    --peter-river: #3498DB;
+    --belize-hole: #2980B9;
+    --amethyst: #9B59B6;
+    --wisteria: #8E44AD;
+    --wet-asphalt: #34495E;
+    --midnight-blue: #2C3E50;
+    --sun-flower: #F1C40F;
+    --orange: #F39C12;
+    --carrot: #E67E22;
+    --pumpkin: #D35400;
+    --alizarin: #E74C3C;
+    --pomegranate: #C0392B;
+    --clouds: #ECF0F1;
+    --silver: #BDC3C7;
+    --concrete: #95A5A6;
+    --asbestos: #7F8C8D;
+
+    /* Declare reusable sizes */
+    --navbar-height: 90px;
+    --dropdown-width: 355px;
+    --search-height: 50px;
+    --search-width: 396px;
+}
+
+html, body, #app {
+    margin: 0;
+    height: 100%;   
+}
+
+body {
+    font-family: 'Roboto Mono', monospace; 
+    color: black;
+    margin: 0px;
+    padding: 0px;
+    overflow-y: hidden; /* FIXME we should not have an overflow on body */
+}
+
+button {
+    outline-width: 0;
+    border: 0px;
+}
+
+.navbar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    height: var(--navbar-height);
+    width: 100%;
+    border-bottom: solid var(--silver) 1px;
+    z-index: 2;
+    background-color: white;
+}
+
+.main {
+    padding-top: var(--navbar-height);
+    box-sizing: border-box;
+    height: 100%;
+}
+
+.dropdown {
+    width: var(--dropdown-width);
+    font-size: 2em;
+    cursor: pointer;
+    line-height: 90px;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow-x: hidden;
+}
+
+.dropdown-selection {
+    float: left;
+    width: 310px;
+    overflow-x: hidden;
+    text-indent: 15px;
+} 
+
+.dropdown-caret {
+    float: right;
+}
+
+.dropdown i {
+    line-height: var(--navbar-height);
+    font-size: 30px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: var(--navbar-height);
+    z-index: 2; /* stay on top */
+    overflow-y: scroll;
+    max-height: 500px;
+    border: solid var(--silver) 1px;
+}
+
+.dropdown-item {
+    padding: 0;
+    text-indent: 15px;
+    line-height: var(--navbar-height);
+    vertical-align: middle;
+    overflow-x: hidden;
+    width: var(--dropdown-width); 
+    height: var(--navbar-height);
+    background-color: white;
+    border: solid var(--silver);
+    border-width: 1px 0px 0px 0px;
+}
+
+.dropdown-content .dropdown-item:first-child {
+    border-width: 0px; 
+} 
+
+.dropdown-item:hover {
+    background-color: var(--turquoise)
+}
+
+.dropdown:hover i {
+    color: var(--turquoise)
+}
+
+.search {
+    font-size: 20px;
+    position: relative;
+    width: var(--search-width);
+    margin-left: 45px;
+    display: flex;
+    align-items: center;
+}
+
+.search input {
+    font-family: 'Roboto Mono', monospace; 
+    font-size: 20px;
+    height: var(--search-height);
+    width: 396px;
+    border-radius: 10px;
+    border: solid var(--silver) 1px; 
+    color: black;
+    padding-left: 40px;
+    padding-right: 40px;
+    outline-width: 0;
+}
+
+.search input::placeholder {
+    color: var(--silver);
+    opacity: 1;
+}
+
+.search input:focus {
+    border-color: var(--turquoise);
+    box-shadow: 0 0 0 0;
+}
+
+.search .ic-search {
+    position: absolute;
+    left: 10px;
+    top: 33px;
+    color: var(--silver);
+}
+
+.search input:focus + .ic-search {
+    color: var(--turquoise);
+}
+
+.search .ic-close {
+    position: absolute;
+    right: 10px;
+    top: 33px;
+    color: var(--silver);
+    cursor: pointer;
+}
+
+.search-suggestion-content {
+    display: block;
+    position: absolute;
+    width: var(--search-width);
+    top: 71px;
+    background-color: white;
+    z-index: 2;
+}
+
+.search-suggestion-item {
+    position: relative;
+    font-family: 'Roboto Mono', monospace;
+    height: var(--search-height);
+    border: solid black 1px;
+    line-height: var(--search-height);
+    vertical-align: middle;
+    padding-left: 40px;
+    border: solid var(--silver);
+    border-width: 0 1px 1px 1px;
+    cursor: pointer;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+.search-suggestion-content .search-suggestion-item:first-child {
+    border: solid var(--silver) 1px;
+}
+
+.search-suggestion-item:hover {
+    background-color: var(--turquoise);
+}
+
+.search-suggestion-item .ic-person {
+    position: absolute;
+    top: 13px;
+    left: 10px;
+    color: black;
+}
+
+.drawer {
+    position: absolute;
+    height: 100%;
+    z-index: 1; 
+    overflow-x: hidden; 
+    transition: 0.1s; 
+    border-right: solid var(--silver) 1px;
+    border-left: solid var(--silver) 1px;
+    transition: width 0.3s;
+    background-color: white;
+}
+
+
+.drawer-button {
+    position: absolute;
+    top: 110px;
+    height: 35px;
+    width: 15px;
+    background-color: var(--silver); 
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: margin-left 0.3s;
+    z-index: 1;
+}
+
+.arrow-left {
+    width: 0; 
+    height: 0; 
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent; 
+    border-right: 6px solid black; 
+  }
+
+.arrow-right {
+    width: 0; 
+    height: 0; 
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent; 
+    border-left: 6px solid black;
+}
+
+.focus-node-label {
+    background-color: var(--clouds);
+    height: 100px;
+    display: flex;
+    align-items: center; 
+    font-size: 1.3em;
+}
+
+.focus-node-label > div {
+    max-width: 355px;
+    padding-left: 15px;
+    padding-right: 15px; 
+}
+
+.focus-node-label > div > span:last-child {
+    color: var(--concrete);
+}
+
+.focus-node-controls {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    border-bottom: solid 1px var(--clouds);
+}
+
+.focus-node-controls > div {
+    margin: auto;
+}
+
+.focus-node-controls > div > button * {
+    font-size: 1.5em;
+}
+
+.focus-node-controls > div > button:hover * {
+    color: var(--turquoise);
+}
+
+.focus-node-controls > div > button:hover {
+    cursor: pointer;
+}
+
+.focus-node-properties {
+    border-bottom: solid 1px var(--clouds); 
+    padding: 5px;
+}
+
+.table {
+    display: table;
+    border-collapse: separate;
+    border-spacing: 10px ; 
+    width: 100%;
+}
+
+.table-row {
+    display: table-row;
+    width: 100%;
+    padding:0;
+}
+
+.table-cell {
+    display: table-cell;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 130px;
+    font-size: 0.8em;
+}
+
+.table-caption {
+    display: table-caption;
+    text-decoration: none;
+    position: relative;
+    position: relative;
+    width: 100%;
+}
+
+.table-caption:after {
+    content: '';
+    width: 100%;
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    border-width: 0 0 1px;
+    border-style: solid;
+    border-color: var(--clouds);
+}
+
+.focus-node-links {
+    padding: 5px;
+}
+
+.focus-node-links-details {
+    padding-top: 10px; 
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
+
+.focus-node-links-details > div {
+    display: inline-block;
+}
+
+.focus-node-links-details button {
+    border: solid 1px;
+    display: inline-block;
+    margin-left: 95px;
+    padding: 5px;
+}
+
+.focus-node-links button:hover {
+    color: var(--turquoise);
+    cursor: pointer;
+}
+
+.focus-node-links .table-cell {
+    text-align: left;
+}
+
+/* The Modal (background) */
+.modal {
+    position: fixed; /* Stay in place */
+    z-index: 3; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: white;
+    margin: 15% auto;  /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid var(--silver);
+    width: 50%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+    color: var(--silver);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.ic-close:hover,
+.ic-close:focus {
+    color: var(--turquoise);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.link-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin: 0 20%;
+}
+
+.link-summary i {
+    font-size: 30px;
+}
+
+.modal-content table {
+    margin: 20px auto;
+    width: 60%;
+}
+
+.modal-content th {
+    text-align: left;
+}
+
+.modal-content table, th, td {
+    border: 1px solid var(--clouds);
+    border-collapse: collapse;
+}
+
+.graph-container {
+    height: 100%;
+    width: 100%;
+}
+
+.graph-container svg {
+    height: 100%;
+    width: 100%;
+}
+
+.loader {
+    border: 10px solid var(--clouds);
+    border-top: 10px solid var(--turquoise);
+    border-radius: 60%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -30px 0 0 -30px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.node, .nodelabel {
+    cursor: pointer;
+}
+
+.widget-zoom {
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+}
+
+.widget-zoom button {
+    display: block;
+    height: 30px;
+    width: 30px;
+    position: relative;
+}
+
+
+.widget-zoom button:first-child  {
+    border: solid 1px;
+    margin-bottom: 5px;
+}
+
+.widget-zoom button:nth-child(2)  {
+    border: solid 1px;
+}
+
+.widget-zoom button:nth-child(3) {
+    border-left: solid 1px;
+    border-right: solid 1px;
+    border-bottom: solid 1px;
+}
+
+.widget-zoom button:hover {
+    cursor: pointer;
+}
+
+.widget-zoom button:hover i {
+    color: var(--turquoise);
+}
+
+.widget-zoom button i {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+}
+

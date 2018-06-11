@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Graph Explorer</title>
+</head>
+
+<body>
+	<!-- Load external libraries. This is done inside the <body> tag to quickly export it 
+		into a Dataiku web app environment where we only define the body -->
+	<link href="/local/static/graph-explorer/css/roboto.css" rel="stylesheet">
+	<link href="/local/static/graph-explorer/css/material-icons.css" rel="stylesheet">
+	<script type="text/javascript" src="/local/static/graph-explorer/js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="/local/static/graph-explorer/js/d3.v4.js"></script>
+	<script type="text/javascript" src="/local/static/graph-explorer/js/vue.js"></script>
+	<script type="text/javascript" src="/local/static/graph-explorer/js/utils.js"></script>
+
+	<!-- container mounted by Vue.js -->
+	<div id="app">
+
+		<!-- Top navigation bar containing a dropdown menu and a search bar  -->
+		<div class="navbar">
+			<div class="dropdown" @mouseleave="closeDropdown" @mouseover="openDropdown">
+				<span class="dropdown-selection" :value="datasetSelected.id">{{ datasetSelected.name }} </span>
+				<div class="dropdown-caret">
+					<i class="material-icons">expand_more</i>
+				</div>
+				<div id="dropdown-content" class="dropdown-content" v-bind:style="{display: dropdownContentDisplay}">
+					<div class="dropdown-item" v-for="dataset in datasets" :value="dataset.id" v-on:click="handleDropdownItemClicked">
+						{{dataset.name}}
+					</div>
+				</div>
+			</div>
+			<div class="search">
+				<input id="search-input" type="text" placeholder="Rechercher dans le graphe" autofocus v-model="searchPattern" v-on:focus="handleSearchInputFocus">
+				<i class="material-icons ic-search">search</i>
+				<i class="material-icons ic-close" v-on:click="clearSearch">clear</i>
+				<div class="search-suggestion-content">
+					<div class="search-suggestion-item" v-for="suggestion in searchSuggestions">
+						<div :value="suggestion.entity" v-on:click="handleSearchSuggestionClicked">{{ suggestion.prenom_nom }}</div>
+						<i class="material-icons ic-person">person</i>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- The main content of the window containing a collapsable drawer 
+			on the left and a graph container on the right-->
+		<div class="main">
+
+			<div class="drawer" v-bind:style="drawerStyle" v-if="focusNode">
+				<div class="focus-node-label">
+					<div>
+						<span>{{focusNode.prenom}}</span> 
+						<span>{{focusNode.nom}}</span> 
+						<span>{{"#" + focusNode.entity}}</span>
+					</div>
+				</div>
+				<div class="focus-node-controls">
+					<div>
+						<button>
+							<div><i class="material-icons">unfold_more</i></div>
+							<div>EXPAND</div>
+						</button>
+					</div>
+					<div>
+						<button>
+							<div><i class="material-icons">visibility_off</i></div>
+							<div>HIDE</div>
+						</button>
+					</div>
+					<div>
+						<button>
+							<div><i class="material-icons">unfold_less</i></div>
+							<div>COLLAPSE</div>
+						</button>
+					</div>
+				</div>
+				<div class="focus-node-properties">
+					<div class="table">
+						<div class="table-row" v-for="property in displayableProperties">
+							<label class="table-cell" :for="property.key">{{property.label}}</label>
+							<span class="table-cell" :id="property.key">
+								{{focusNode[property.key]}}
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="focus-node-links">
+					<div class="focus-node-links-details">
+						<div>{{focusNode.degree + " links"}}</div>
+						<button>DETAIL</button>
+					</div>
+					<div class="table">
+						<div class="table-row" v-for="link in focusNodeLinks">
+							<span class="table-cell">{{link.source.prenom + " " + link.source.nom}}</span>
+							<i class="table-cell material-icons">arrow_right_alt</i>
+							<span class="table-cell">{{link.target.prenom + " " + link.target.nom}}</span>
+						</div>
+					</div>
+				</div>
+
+
+			</div>
+			<button class="drawer-button" v-on:click="handleDrawerButtonClicked" v-bind:style="drawerButtonStyle">
+				<div v-bind:class="[arrowClass]"></div>
+			</button>
+
+			<!-- Graph container  -->
+			<div class="graph-container">
+				<svg id="svg">
+					<defs>
+						<marker id="arrowhead" viewBox="-0 -5 10 10" refX="20" refY="0" orient="auto" markerWidth="3" markerHeight="3" xoverflow="visbile">
+							<path d="M 0,-5 L 10, 0 L 0, 5" fill="var(--grey)" opacity="0.2" stroke="none;"></path>
+						</marker>
+					</defs>
+					<!-- Main containers for the d3.js force directed graph. 
+						They will be populated dynamically by d3.js -->
+					<g class="graph">
+						<g class="links"></g>
+						<g class="edgepaths"></g>
+						<g class="edgelabels"></g>
+						<g class="nodes"></g>
+						<g class="nodelabels"></g>
+					</g>
+				</svg>
+			</div>
+		</div>
+
+		<!-- Zoom in/out buttons -->
+		<div class="widget-zoom" v-bind:style='widgetZoomStyle'>
+			<button id="widget-zoom-in" v-on:click="zoomReset"> 
+				<i class="material-icons">zoom_out_map</i>
+			</button>
+			<button id="widget-zoom-in" v-on:click="zoomIn"> 
+				<i class="material-icons">add</i>
+			</button>
+			<button id="widget-zoom-out" v-on:click="zoomOut">
+				<i class="material-icons">remove</i>
+			</button>
+		</div>
+
+
+		<div class="modal">
+			<div id="test-hot-app" class="modal-content">
+			</div>
+		</div>
+
+		<!-- The loader -->
+		<div class="loader" v-bind:style="{display: loaderDisplay}"></div>
+	</div>
+</body>
+
+<!-- Load style.css and app.js after the <body> tag. In a Dataiku web app environement, they would
+	be loaded automatically -->
+<link rel="stylesheet" href="/local/static/style.css">
+<script type="text/javascript" src="/local/static/app.js"></script>
+
+</html>
