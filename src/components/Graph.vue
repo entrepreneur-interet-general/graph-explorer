@@ -17,6 +17,7 @@
         <g class="nodelabels"></g>
       </g>
     </svg>
+    <Caption v-show=focusNodeEntity></Caption>
   </div>
 </template>
 
@@ -27,6 +28,7 @@ import api from "../api";
 import { getStarCoordinates } from "../utils";
 import { UPDATE_FOCUS_NODE, UPDATE_NODES, UPDATE_LINKS } from "../mutation-types";
 import { mapState } from 'vuex';
+import Caption from './Caption.vue';
 
 export default {
   computed: mapState({
@@ -34,6 +36,7 @@ export default {
     nodesData: state => state.nodes,
     linksData: state => state.links 
   }),
+  components: { Caption },
   watch: {
     nodesData(){
       this.draw();
