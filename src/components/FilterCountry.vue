@@ -1,7 +1,7 @@
 <template>
   <div class="filter-menu">
     <md-menu :md-offset-y="5" @md-opened="handleOpen" @md-closed="handleClose">
-      <md-button md-menu-trigger v-bind:style=menuButtonStyle v-bind:disabled="countries.length==0">{{menuButtonLabel}}</md-button>
+      <md-button md-menu-trigger v-bind:style=menuButtonStyle disabled>{{menuButtonLabel}}</md-button>
       <md-menu-content class="filter-menu-content">
         <div>
           <md-checkbox v-model="filter" v-for="country in countries" :key="country.code" v-bind:value="country.code">{{country.name}}</md-checkbox>

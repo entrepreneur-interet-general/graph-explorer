@@ -160,6 +160,9 @@ export default {
         .classed("node-focus", d => {
           return d.entity == vm.focusNodeEntity;
         })
+        .classed("serbia", d => {
+          return d.pays_code == "RS";
+        })
         .call(function (node) { node.transition().attr("r", 3); })
         .on("click", vm.handleNodeClicked)
         .on("dblclick", vm.handleNodeDblclick)
@@ -177,6 +180,9 @@ export default {
       const newStars = vm.stars.enter()
         .append("polygon")
         .attr("class", "node")
+        .classed("serbia", d => {
+          return d.pays_code == "RS";
+        })
         .on("click", vm.handleNodeClicked)
         .on("dblclick", vm.handleNodeDblclick)
         .call(d3.drag()
@@ -331,6 +337,10 @@ export default {
 .node, .triangle {
   fill: $peter-river;
   opacity: 0.5;
+}
+
+.serbia {
+  fill: $pomegrenate;
 }
 
 .node, .node-label {

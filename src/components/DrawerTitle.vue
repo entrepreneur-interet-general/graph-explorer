@@ -23,8 +23,7 @@ export default {
 
 #drawer-title {
   margin-top: 87px;
-  background-color: $peter-river;
-  color: white;
+  background-color: $silver;
   min-width: 0;
 }
 

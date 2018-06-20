@@ -1,0 +1,187 @@
+{
+	"directed": false,
+	"multigraph": false,
+	"graph": {},
+	"nodes": [{
+		"entity": 36000,
+		"pays": "FRANCE",
+		"pays_code": "FR",
+		"code_postal": "69120",
+		"prenom": "Morgan",
+		"nom": "Mccarthy",
+		"date_naissance": "1994-02-24",
+		"telephone": "1-979-111-9013",
+		"numero_piece_identite": "YZEK7HVUGQ",
+		"prenom_nom": "Morgan Mccarthy",
+		"id": 36000
+	}, {
+		"entity": 36001,
+		"pays": "FRANCE",
+		"pays_code": "FR",
+		"code_postal": "69120",
+		"prenom": "Brian",
+		"nom": "Williams",
+		"date_naissance": "1984-10-12",
+		"telephone": "(095)391-3975",
+		"numero_piece_identite": "T5AKHD7J28",
+		"prenom_nom": "Brian Williams",
+		"id": 36001
+	}, {
+		"entity": 36002,
+		"pays": "FRANCE",
+		"pays_code": "FR",
+		"code_postal": "69120",
+		"prenom": "Tiffany",
+		"nom": "Smith",
+		"date_naissance": "1989-10-23",
+		"telephone": "1-252-257-1292x5936",
+		"numero_piece_identite": "U9FAZX0MQ3",
+		"prenom_nom": "Tiffany Smith",
+		"id": 36002
+	}, {
+		"entity": 36004,
+		"pays": "SERBIE",
+		"pays_code": "RS",
+		"code_postal": "69120",
+		"prenom": "Sean",
+		"nom": "Miller",
+		"date_naissance": "1992-04-10",
+		"telephone": "1-203-890-8887",
+		"numero_piece_identite": "9LOYK8ZB3F",
+		"prenom_nom": "Sean Miller",
+		"id": 36004
+	}, {
+		"entity": 36005,
+		"pays": "SERBIE",
+		"pays_code": "RS",
+		"code_postal": "69120",
+		"prenom": "Chad",
+		"nom": "Flynn",
+		"date_naissance": "1972-11-14",
+		"telephone": "1-644-451-4997x29427",
+		"numero_piece_identite": "IWQJA1OZ2D",
+		"prenom_nom": "Chad Flynn",
+		"id": 36005
+	}, {
+		"entity": 36006,
+		"pays": "SERBIE",
+		"pays_code": "RS",
+		"code_postal": "69120",
+		"prenom": "Jennifer",
+		"nom": "Green",
+		"date_naissance": "1985-10-28",
+		"telephone": "845-566-1596",
+		"numero_piece_identite": "JYGMF9DZTP",
+		"prenom_nom": "Jennifer Green",
+		"star": true,
+		"id": 36006
+	}],
+	"links": [{
+		"valeur_euro": 6565,
+		"transactions": [{
+			"valeur_euro": 2239
+		}, {
+			"valeur_euro": 2774
+		}, {
+			"valeur_euro": 1552
+		}],
+		"source": 36000,
+		"target": 36004
+	}, {
+		"valeur_euro": 3581,
+		"transactions": [{
+			"valeur_euro": 2420
+		}, {
+			"valeur_euro": 1161
+		}],
+		"source": 36000,
+		"target": 36005
+	}, {
+		"valeur_euro": 32062,
+		"transactions": [{
+			"valeur_euro": 2825
+		}, {
+			"valeur_euro": 1789
+		}, {
+			"valeur_euro": 1996
+		}, {
+			"valeur_euro": 1175
+		}, {
+			"valeur_euro": 2245
+		}, {
+			"valeur_euro": 2668
+		}, {
+			"valeur_euro": 2906
+		}, {
+			"valeur_euro": 1743
+		}, {
+			"valeur_euro": 2914
+		}, {
+			"valeur_euro": 2588
+		}, {
+			"valeur_euro": 2592
+		}, {
+			"valeur_euro": 1896
+		}, {
+			"valeur_euro": 1778
+		}, {
+			"valeur_euro": 2947
+		}],
+		"source": 36001,
+		"target": 36004
+	}, {
+		"valeur_euro": 8906,
+		"transactions": [{
+			"valeur_euro": 1779
+		}, {
+			"valeur_euro": 1784
+		}, {
+			"valeur_euro": 2733
+		}, {
+			"valeur_euro": 1262
+		}, {
+			"valeur_euro": 1348
+		}],
+		"source": 36001,
+		"target": 36005
+	}, {
+		"valeur_euro": 4350,
+		"transactions": [{
+			"valeur_euro": 1398
+		}, {
+			"valeur_euro": 1634
+		}, {
+			"valeur_euro": 1318
+		}],
+		"source": 36001,
+		"target": 36006
+	}, {
+		"valeur_euro": 2784,
+		"transactions": [{
+			"valeur_euro": 2784
+		}],
+		"source": 36002,
+		"target": 36005
+	}, {
+		"valeur_euro": 16345,
+		"transactions": [{
+			"valeur_euro": 2974
+		}, {
+			"valeur_euro": 1199
+		}, {
+			"valeur_euro": 2366
+		}, {
+			"valeur_euro": 1187
+		}, {
+			"valeur_euro": 2982
+		}, {
+			"valeur_euro": 2400
+		}, {
+			"valeur_euro": 1753
+		}, {
+			"valeur_euro": 1484
+		}],
+		"source": 36002,
+		"target": 36006
+	}]
+}

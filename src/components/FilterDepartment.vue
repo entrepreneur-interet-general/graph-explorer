@@ -1,7 +1,7 @@
 <template>
   <div class="filter-menu">
     <md-menu :md-offset-y="5" @md-opened="handleOpen" @md-closed="handleClose">
-      <md-button md-menu-trigger v-bind:style=menuButtonStyle v-bind:disabled="departments.length==0">{{menuButtonLabel}}</md-button>
+      <md-button disabled md-menu-trigger v-bind:style=menuButtonStyle>{{menuButtonLabel}}</md-button>
       <md-menu-content class="filter-menu-content">
         <div>
           <md-checkbox v-model="filter" v-for="department in departments" v-bind:key="department.code" v-bind:value="department.code">{{department.name}}</md-checkbox>
