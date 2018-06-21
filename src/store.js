@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { UPDATE_FILTER, UPDATE_FOCUS_NODE, UPDATE_NODES, UPDATE_LINKS } from './mutation-types';
+import { UPDATE_FILTER, UPDATE_FOCUS_NODE, UPDATE_NODES, UPDATE_LINKS, SHOW_MODAL, HIDE_MODAL } from './mutation-types';
 import api from './api';
 
 
@@ -14,11 +14,25 @@ export default new Vuex.Store({
     },
     focusNodeEntity: null,
     nodes: [],
-    links: []
+    links: [],
+    showModal: false
   },
   getters: {
     focusNode(state) {
-      return state.nodes.find(node => node.entity == state.focusNodeEntity)
+      if (state.focusNodeEntity) {
+        return state.nodes.find(node => node.entity == state.focusNodeEntity)
+      }
+      return null;
+    },
+    focusNodeLinks(state) {
+      if (state.focusNodeEntity) {
+        return state.links.filter(link => {
+          const source = link.source.entity ? link.source.entity : link.source;
+          const target = link.target.entity ? link.target.entity : link.target;
+          return source == state.focusNodeEntity || target == state.focusNodeEntity;
+        });
+      }
+      return [];
     }
   },
   mutations: {
@@ -35,6 +49,12 @@ export default new Vuex.Store({
     },
     [UPDATE_LINKS] (state, payload) {
       state.links = payload;
+    },
+    [SHOW_MODAL] (state) {
+      state.showModal = true;
+    },
+    [HIDE_MODAL] (state) {
+      state.showModal = false;
     }
   },
   actions: {

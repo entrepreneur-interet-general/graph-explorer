@@ -5,9 +5,9 @@
     <drawer></drawer>
     <graph></graph>
     <zoom-widget></zoom-widget>
-    <!-- <modal>
-      <spreadsheet></spreadsheet>
-    </modal> -->
+    <modal v-show="showModal">
+      <modal-links-detail></modal-links-detail>
+    </modal>
   </div>
 </template>
 
@@ -18,16 +18,17 @@ import Drawer from "./Drawer.vue";
 import Graph from "./Graph.vue";
 import ZoomWidget from "./ZoomWidget.vue";
 import Modal from "./Modal.vue";
-import Spreadsheet from "./Spreadsheet.vue";
-import { mapActions } from 'vuex';
+import ModalLinksDetail from "./ModalLinksDetail.vue";
+import { mapActions, mapState } from 'vuex';
 
 export default {
   name: "app",
-  components: {Search, FilterList, Drawer, Graph, ZoomWidget, Modal, Spreadsheet },
+  components: {Search, FilterList, Drawer, Graph, ZoomWidget, Modal, ModalLinksDetail },
   computed: {
     filter() {
       return this.$store.state.filter;
-    }
+    },
+    ...mapState(["showModal"])
   },
   methods: {
     ...mapActions(['expand'])

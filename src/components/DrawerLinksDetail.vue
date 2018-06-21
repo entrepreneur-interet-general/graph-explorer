@@ -3,25 +3,22 @@
   <div class="drawer-links-detail">
     <div class="focus-node-links-details">
       <div>{{focusNode.degree + " links"}}</div>
-      <md-button class="md-small">DETAIL</md-button>
+      <md-button class="md-small" @click="SHOW_MODAL">DETAIL</md-button>
     </div>
-    <!-- <div class="table">
-      <div class="table-row" v-for="link in focusNodeLinks">
-        <span class="table-cell">{{link.source.prenom + " " + link.source.nom}}</span>
-        <i class="table-cell material-icons">arrow_right_alt</i>
-        <span class="table-cell">{{link.target.prenom + " " + link.target.nom}}</span>
-      </div>
-    </div> -->
   </div>
   
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapMutations } from 'vuex';
+import { SHOW_MODAL } from '../mutation-types'
 
 export default {
   computed: {
     ...mapGetters(["focusNode"])
+  },
+  methods: {
+    ...mapMutations([SHOW_MODAL])
   }
 }
 </script>

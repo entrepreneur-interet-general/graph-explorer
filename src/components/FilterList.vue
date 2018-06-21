@@ -1,18 +1,16 @@
 <template>
   <div id="filters">
-    <filter-country></filter-country>
-    <filter-department></filter-department>
+    <filter-geo></filter-geo>
     <filter-date></filter-date>
   </div>
 </template>
 
 <script>
-import FilterCountry from "./FilterCountry.vue";
-import FilterDepartment from "./FilterDepartment.vue";
+import FilterGeo from "./FilterGeo.vue";
 import FilterDate from "./FilterDate.vue";
 
 export default {
-  components: { FilterCountry, FilterDepartment, FilterDate }
+  components: { FilterGeo, FilterDate }
 };
 </script>
 
