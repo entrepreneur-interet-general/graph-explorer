@@ -64,7 +64,7 @@ module.exports = {
         test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
         loader: 'file-loader',
         options: {
-          name: '[name].[ext]?[hash]'
+          name: './local/static/graph-explorer-0.3/[name].[ext]?[hash]'
         }
       }
     ]

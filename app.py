@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from flask import Flask, request, send_from_directory, jsonify
+from flask import Flask, request, send_from_directory, jsonify, send_file
 import networkx as nx
 
 from utils import expand, collapse
@@ -29,7 +29,7 @@ departments = [
     
 @app.route("/")
 def home():
-    return app.send_static_file('index.html')
+    return send_file('index.html')
 
 
 @app.route('/dist/<path:path>')
