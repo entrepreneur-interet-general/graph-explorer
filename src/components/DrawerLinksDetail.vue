@@ -1,10 +1,21 @@
 <template>
 
-  <div class="drawer-links-detail">
-    <div class="focus-node-links-details">
-      <div>{{focusNode.degree + " links"}}</div>
-      <md-button class="md-small" @click="SHOW_MODAL">DETAIL</md-button>
+  <div id="drawer-links-detail">
+    <div class="table">
+      <div class="table-row">
+        <label class="table-cell">Total reçu</label>
+        <span class="table-cell">
+          {{`${focusNode.in_degree_weighted}€`}}
+        </span>
+      </div>
+      <div class="table-row">
+        <label class="table-cell">Total envoyé</label>
+        <span class="table-cell">
+          {{`${focusNode.out_degree_weighted}€`}}
+        </span>
+      </div>
     </div>
+    <md-button class="md-small table-cell" @click="SHOW_MODAL">DÉTAIL</md-button>
   </div>
   
 </template>
@@ -27,26 +38,42 @@ export default {
 
   @import "../scss/settings.scss";
 
-  .focus-node-links-details {
-    padding-left: 16px;
+  #drawer-links-detail {
+
+    padding-left: 6px;
     padding-right: 16px;
-    padding-top: 15px;
-    display: flex;
-    align-items: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+
+    .table {
+      display: table;
+      border-collapse: separate;
+      border-spacing: 10px ; 
+      width: 100%;
+      padding-right: 0;
+    }
+
+    .table-row {
+      display: table-row;
+      width: 100%;
+      padding:0;
+    }
+
+    .table-cell {
+      display: table-cell;
+      overflow: hidden;
+      white-space: nowrap;
+      max-width: 80px;
+    }
+
+    .md-button {
+      border: solid 1px $silver;
+      margin: 0;
+      margin-top: 10px;
+      margin-left: 10px;
+    }
 
   }
-
-  .focus-node-links-details > .md-button {
-    // position: relative;
-    // top: -15px;
-    border: solid 1px $silver;
-    margin-left: 30px;
-    text-align: center;
-  }
-
-
-
- 
 
 
 </style>

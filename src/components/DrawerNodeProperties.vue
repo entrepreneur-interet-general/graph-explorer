@@ -46,26 +46,26 @@ export default {
   padding-bottom: 20px;
   border-bottom: solid 1px $clouds;
 
-.table {
-  display: table;
-  border-collapse: separate;
-  border-spacing: 10px ; 
-  width: 100%;
-  padding-right: 0;
-}
+  .table {
+    display: table;
+    border-collapse: separate;
+    border-spacing: 10px ; 
+    width: 100%;
+    padding-right: 0;
+  }
 
-.table-row {
-  display: table-row;
-  width: 100%;
-  padding:0;
-}
+  .table-row {
+    display: table-row;
+    width: 100%;
+    padding:0;
+  }
 
-.table-cell {
-  display: table-cell;
-  overflow: hidden;
-  white-space: nowrap;
-  max-width: 130px;
-}
+  .table-cell {
+    display: table-cell;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 130px;
+  }
 
 
 }

@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <search></search>
-    <filter-list></filter-list>
+    <!-- <filter-list></filter-list> -->
     <drawer></drawer>
     <graph></graph>
     <zoom-widget></zoom-widget>
