@@ -26,7 +26,7 @@ export default {
   },
   subgraph(options, callback){
     axios.post(subgraphUrl, options).then(response => {
-      callback(response.data.data);
+      callback(response.data);
     })
   } 
 }

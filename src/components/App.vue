@@ -34,7 +34,7 @@ export default {
     ...mapActions(['expand'])
   },
   mounted() {
-    this.expand(19336) // 19336 = Jill Sanchez, 23709 Jasmine Calderon 
+    //this.expand(19336) // 19336 = Jill Sanchez, 23709 Jasmine Calderon 
   }
 };
 </script>

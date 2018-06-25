@@ -18,6 +18,7 @@ MANIFEST
 .DS_Store
 node_modules/
 dist/
+local/
 npm-debug.log
 yarn-error.log
 .nvmrc

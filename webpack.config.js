@@ -4,8 +4,8 @@ var webpack = require('webpack')
 module.exports = {
   entry: './src/main.js',
   output: {
-    path: path.resolve(__dirname, './dist'),
-    publicPath: '/dist/',
+    path: path.resolve(__dirname, './local'),
+    publicPath: '/local/',
     filename: 'build.js'
   },
   module: {
@@ -64,7 +64,7 @@ module.exports = {
         test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
         loader: 'file-loader',
         options: {
-          name: './local/static/graph-explorer-0.3/[name].[ext]?[hash]'
+          name: './static/graph-explorer-0.3/[name].[ext]?[hash]'
         }
       }
     ]

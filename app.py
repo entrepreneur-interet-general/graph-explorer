@@ -6,7 +6,7 @@ import networkx as nx
 
 from utils import expand, collapse
 
-app = Flask(__name__, static_folder="dist")
+app = Flask(__name__, static_folder="local")
 
 # Dummy graph
 G = nx.read_gpickle('./data/graph.p')
@@ -68,7 +68,7 @@ def get_subgraph():
         H = nx.Graph(H) # create a copy
         H = collapse(H, collapse_node)
     data = nx.node_link_data(H)
-    return json.dumps({"status": "ok", "data": data})
+    return jsonify(data)
 
 @app.route('/search')
 def search():
@@ -85,4 +85,4 @@ def search():
         # TODO apply filter
         # match if contains substring 
         data = [node for node in nodes if search_term in node['prenom_nom'].lower()][:10]
-    return json.dumps(data)
+    return jsonify(data)
