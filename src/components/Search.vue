@@ -89,10 +89,20 @@ export default {
 
 .md-menu-content {
   max-height: 300px !important;
+  position: absolute;
+  top: 75px !important;
 }
 
 .md-autocomplete-box-content:after {
   border-bottom: none;
+}
+
+.md-menu-item {
+  background-color: white;
+}
+
+.md-list-item-button, .md-list-item-content {
+  height: 50px !important;
 }
 
 .md-menu-item:hover {
@@ -106,5 +116,7 @@ export default {
 .search-visible {
   opacity: 1;
 }
+
+
 </style>
 

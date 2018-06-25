@@ -22,7 +22,7 @@ export default {
         {key: "prenom", label: "Prénom"},
         {key: "nom", label: "Nom"},
         {key: "date_naissance", label: "Date de naissance"},
-        {key: "pays", label: "Pays"},
+        {key: "pays_code", label: "Pays"},
         {key: "code_postal", label: "Code postal"},
         {key: "telephone", label: "Téléphone"},
         {key: "numero_piece_identite", label: "ID"}

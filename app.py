@@ -73,11 +73,11 @@ def get_subgraph():
 @app.route('/search')
 def search():
     """ Search for a specific name containing pattern "pattern" in graph "dataset" 
-        and returns top 5 suggestions 
+        and returns top 10 suggestions 
         :param search_term: The pattern we are searching 
         :param filters: A list of filters 
     """
-    search_term = request.args["search_term"]
+    search_term = request.args.get("search_term")
     data = []
     if search_term:
         search_term = search_term.lower()
