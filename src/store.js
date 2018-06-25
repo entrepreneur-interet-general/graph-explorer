@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { UPDATE_FILTER, UPDATE_FOCUS_NODE, UPDATE_NODES, UPDATE_LINKS, SHOW_MODAL, HIDE_MODAL } from './mutation-types';
+import { UPDATE_FILTER, UPDATE_FOCUS_NODE, UPDATE_NODES, UPDATE_LINKS, 
+  SHOW_MODAL, HIDE_MODAL, SHOW_PROGRESS_SPINNER, HIDE_PROGRESS_SPINNER } from './mutation-types';
 import api from './api';
 
 
@@ -15,7 +16,8 @@ export default new Vuex.Store({
     focusNodeEntity: null,
     nodes: [],
     links: [],
-    showModal: false
+    showModal: false,
+    showProgressSpinner: false
   },
   getters: {
     focusNode(state) {
@@ -55,10 +57,17 @@ export default new Vuex.Store({
     },
     [HIDE_MODAL] (state) {
       state.showModal = false;
+    },
+    [SHOW_PROGRESS_SPINNER] (state) {
+      state.showProgressSpinner = true;
+    },
+    [HIDE_PROGRESS_SPINNER] (state) {
+      state.showProgressSpinner = false;
     }
   },
   actions: {
     expand({ commit, state }, entity) {
+      commit(SHOW_PROGRESS_SPINNER);
       const options = {
         nodes: state.nodes.map(n => n.entity),
         expand_node: entity
@@ -86,9 +95,11 @@ export default new Vuex.Store({
             update_links.push(link);
           }
         })
+        
         commit(UPDATE_FOCUS_NODE, entity);
         commit(UPDATE_NODES, update_nodes);
         commit(UPDATE_LINKS, update_links);
+        commit(HIDE_PROGRESS_SPINNER);
       });
     },
     hide({ commit, state }, entity) {

@@ -8,6 +8,7 @@
     <modal v-show="showModal">
       <modal-links-detail></modal-links-detail>
     </modal>
+    <progress-spinner v-show="showProgressSpinner"></progress-spinner>
   </div>
 </template>
 
@@ -19,16 +20,17 @@ import Graph from "./Graph.vue";
 import ZoomWidget from "./ZoomWidget.vue";
 import Modal from "./Modal.vue";
 import ModalLinksDetail from "./ModalLinksDetail.vue";
+import ProgressSpinner from "./ProgressSpinner";
 import { mapActions, mapState } from 'vuex';
 
 export default {
   name: "app",
-  components: {Search, FilterList, Drawer, Graph, ZoomWidget, Modal, ModalLinksDetail },
+  components: {Search, FilterList, Drawer, Graph, ZoomWidget, Modal, ModalLinksDetail, ProgressSpinner },
   computed: {
     filter() {
       return this.$store.state.filter;
     },
-    ...mapState(["showModal"])
+    ...mapState(["showModal", "showProgressSpinner"])
   },
   methods: {
     ...mapActions(['expand'])
