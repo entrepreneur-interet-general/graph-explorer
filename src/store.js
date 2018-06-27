@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { UPDATE_FILTER, UPDATE_FOCUS_NODE, UPDATE_NODES, UPDATE_LINKS, 
-  SHOW_MODAL, HIDE_MODAL, SHOW_PROGRESS_SPINNER, HIDE_PROGRESS_SPINNER } from './mutation-types';
+import { UPDATE_FILTER, UPDATE_FOCUS_NODE, UPDATE_GRAPH, SHOW_MODAL, HIDE_MODAL, 
+  SHOW_PROGRESS_SPINNER, HIDE_PROGRESS_SPINNER } from './mutation-types';
 import api from './api';
-
+import * as jsnx from 'jsnetworkx'; 
 
 Vue.use(Vuex)
 
@@ -14,25 +14,30 @@ export default new Vuex.Store({
       departement: null
     },
     focusNodeEntity: null,
-    nodes: [],
-    links: [],
+    G: new jsnx.MultiDiGraph(),
     showModal: false,
     showProgressSpinner: false
   },
   getters: {
+    nodes(state) {
+      return state.G.nodes(true).map(([_, node]) => node);
+    },
+    links(state) {
+      return state.G.edges(true).map(([_1, _2, edge]) => edge);
+    },
     focusNode(state) {
       if (state.focusNodeEntity) {
-        return state.nodes.find(node => node.entity == state.focusNodeEntity)
+        return state.G.nodes(true)
+          .map(([_, node]) => node)
+          .find(n => n.entity == state.focusNodeEntity) 
       }
       return null;
     },
     focusNodeLinks(state) {
       if (state.focusNodeEntity) {
-        return state.links.filter(link => {
-          const source = link.source.entity ? link.source.entity : link.source;
-          const target = link.target.entity ? link.target.entity : link.target;
-          return source == state.focusNodeEntity || target == state.focusNodeEntity;
-        });
+        const H = state.G.toUndirected();
+        const edges = H.edges(state.focusNodeEntity, true).map(([_1, _2, edge]) => edge);
+        return edges;
       }
       return [];
     }
@@ -46,11 +51,8 @@ export default new Vuex.Store({
     [UPDATE_FOCUS_NODE] (state, payload) {
       state.focusNodeEntity = payload;
     },
-    [UPDATE_NODES] (state, payload) {
-      state.nodes = payload;
-    },
-    [UPDATE_LINKS] (state, payload) {
-      state.links = payload;
+    [UPDATE_GRAPH] (state, payload) {
+      state.G = payload;
     },
     [SHOW_MODAL] (state) {
       state.showModal = true;
@@ -67,80 +69,46 @@ export default new Vuex.Store({
   },
   actions: {
     expand({ commit, state }, entity) {
+      let G = state.G.copy();
+      if (G.hasNode(entity)) {
+        let node = G.get(entity)
+        if (G.degree(entity) == node.degree) {
+          // the node is already expanded, exit
+          return 
+        }
+      }
+      // else retrieves missing neighbors from the backend
       commit(SHOW_PROGRESS_SPINNER);
       const options = {
-        nodes: state.nodes.map(n => n.entity),
-        expand_node: entity
+        params: { node: entity }
       };
-      api.subgraph(options, ({nodes, links}) => {
-
-        let update_nodes = state.nodes;
-        let update_links = state.links;
-
+      api.neighbors(options, ({ nodes, links }) => {
         nodes.forEach(node => {
-          const exists = state.nodes.find(n => { 
-            return n.entity == node.entity
-          });
-          if (!exists) {
-            update_nodes.push(node);
+          if (!G.hasNode(node.entity)){
+            G.addNode(node.entity, node);
           }
-        })
+        });
         links.forEach(link => {
-          const exists = state.links.find(l => {
-            const s = l.source.entity ? l.source.entity : l.source;
-            const t = l.target.entity ? l.target.entity : l.target;
-            return link.source == s && link.target == t;
-          });
-          if (!exists) {
-            update_links.push(link);
+          if (!G.hasEdge(link.source, link.target)){
+            G.addEdge(link.source, link.target, link)
           }
         })
-        
+        commit(UPDATE_GRAPH, G);
         commit(UPDATE_FOCUS_NODE, entity);
-        commit(UPDATE_NODES, update_nodes);
-        commit(UPDATE_LINKS, update_links);
-        commit(HIDE_PROGRESS_SPINNER);
       });
     },
     hide({ commit, state }, entity) {
-      const nodes = state.nodes.filter(n => n.entity != entity);
-      const links = state.links.filter(link => {
-        const source = link.source.entity ? link.source.entity : link.source;
-        const target = link.target.entity ? link.target.entity : link.target;
-        return source != entity && target != entity
-      })
+      let G = state.G.copy();
+      G.removeNode(entity);
       commit(UPDATE_FOCUS_NODE, null);
-      commit(UPDATE_NODES, nodes);
-      commit(UPDATE_LINKS, links);
+      commit(UPDATE_GRAPH, G);
     },
     collapse({ commit, state }, entity) {
-      const options = {
-        nodes: state.nodes.map(n => n.entity),
-        collapse_node: entity
-      }
-      api.subgraph(options, ({ nodes, links }) => {
-
-        let leafs = []
-        const update_nodes = state.nodes.filter(node => {
-          const exists = nodes.find(n => {
-            return node.entity == n.entity;
-          });
-          if (!exists) {
-            leafs.push(node.entity);
-          }
-          return exists;
-        })
-
-        const update_links = state.links.filter(l => {
-          const s = l.source.entity ? l.source.entity : l.source;
-          const t = l.target.entity ? l.target.entity : l.target;
-          return !(leafs.includes(s) || leafs.includes(t)); 
-        }) 
-
-
-        commit(UPDATE_NODES, update_nodes);
-        commit(UPDATE_LINKS, update_links);
-      });
+      let G = state.G.toUndirected();
+      const neighbors = G.neighbors(entity);
+      const leafs = neighbors.filter(n => G.degree(n) == 1)
+      G.removeNodesFrom(leafs);
+      commit(UPDATE_GRAPH, G);
     }
   }
 })

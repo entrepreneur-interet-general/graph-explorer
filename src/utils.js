@@ -17,3 +17,12 @@ export function getStarCoordinates(center, innerRadius, outerRadius){
   }
   return coordinates;
 }
+
+
+export function array2dict(array, f) {
+  return array.reduce((map, obj) => {
+    const key = f(obj);
+    map[key] = obj
+    return map;
+  }, {})
+}

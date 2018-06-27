@@ -2,11 +2,7 @@
 <template>
   <div id="graph-container">
     <svg id="svg">
-      <defs>
-        <marker id="arrowhead" viewBox="-0 -5 10 10" refX="20" refY="0" orient="auto" markerWidth="3" markerHeight="3" xoverflow="visbile">
-          <path d="M 0,-5 L 10, 0 L 0, 5" fill="var(--grey)" opacity="0.2" stroke="none;"></path>
-        </marker>
-      </defs>
+      <defs></defs>
       <!-- Main containers for the d3.js force directed graph. 
 			They will be populated dynamically by d3.js -->
       <g class="graph">
@@ -23,41 +19,116 @@
 
 <script>
 import * as d3 from "d3";
+import * as jsnx from 'jsnetworkx';
+import { mapState, mapMutations } from 'vuex';
+
 import api from "../api";
-import { getStarCoordinates } from "../utils";
-import { UPDATE_FOCUS_NODE, UPDATE_NODES, UPDATE_LINKS } from "../mutation-types";
-import { mapState } from 'vuex';
+import { getStarCoordinates, array2dict } from "../utils";
+import { UPDATE_FOCUS_NODE, HIDE_PROGRESS_SPINNER } from "../mutation-types";
+import Worker from '../force.worker.js';
 
 export default {
-  computed: mapState({
-    focusNodeEntity: state => state.focusNodeEntity,
-    nodesData: state => state.nodes,
-    linksData: state => state.links 
-  }),
+  data() {
+    /* Keep a local copy of nodes and links that will be assigned extra properties by d3 force
+    simulation
+
+    For nodes {index, x, y, vx, vy, fx, fy}
+    https://github.com/d3/d3-force/blob/master/README.md#simulation_nodes
+
+    For links {source, target, index}
+    https://github.com/d3/d3-force/blob/master/README.md#link_links
+    */
+    return {
+      nodes: [],
+      links: []
+    }
+  },
+  computed: {
+    nodesDict() {
+      return array2dict(this.nodes, n => n.entity);
+    },
+    /** 
+     * Returns the focusNode with all its properties 
+     * */ 
+    focusNode() {
+      return this.nodesDict[this.focusNodeEntity];
+    },
+    /**
+     * Split the nodes in two lists based on whether or not they are starred
+     */
+    nodesByType() {
+      let starNodes = [];
+      let nonStarNodes = [];
+      this.nodes.forEach(node => {
+        if (node.star) {
+          starNodes.push(node)
+        } else {
+          nonStarNodes.push(node)
+        }
+      }) 
+      return [starNodes, nonStarNodes];
+    },
+    ...mapState(['focusNodeEntity', 'G'])
+  },
   watch: {
-    nodesData(){
-      this.draw();
+    /** re-compute the local version of nodes and links 
+    whenever the underlying graph structure changes by re-running 
+    the force simulation 
+    */
+    G() {
+      const vm = this;
+      const nodes = vm.$store.getters.nodes;
+      const links = vm.$store.getters.links;
+      let nodesDict = vm.nodesDict;
+
+      // map force layout properties to updated data 
+      vm.nodes = nodes.map(node => {
+        let n = Object.assign({}, node);
+        if (n.entity in nodesDict) {
+          n = nodesDict[n.entity];
+          if (n.entity == vm.focusNodeEntity){
+            // fix the position of the node under focus
+            n.fx = n.x;
+            n.fy = n.y; 
+          }
+        }
+        return n;
+      });
+      vm.links = links.map(link => {
+        let l = Object.assign({}, link);
+        l.source = l.source in nodesDict ? nodesDict[l.source]: l.source;
+        l.target = l.target in nodesDict ? nodesDict[l.target]: l.target;
+        return l;
+      })
+
+      vm.forceSimulation(() => {
+        // release the position of the focus node if exists 
+        if (vm.focusNode){          
+          vm.focusNode.fx = null;
+          vm.focusNode.fy = null;
+        }
+        vm.HIDE_PROGRESS_SPINNER();
+        vm.draw()
+      });
     }
   },
   mounted() {
     const vm = this;
 
-    vm.svg = d3.select("svg");
-    vm.graph = d3.select(".graph");
-    vm.links = d3.select(".links").selectAll(".link");
-    vm.edgepaths = d3.select(".edgepaths").selectAll(".edgepath");
-    vm.edgelabels = d3.select(".edgelabels").selectAll(".edgelabel");
-    vm.circles = d3.select(".nodes").selectAll(".circle");
-    vm.stars = d3.select(".nodes").selectAll(".star")
-    vm.nodelabels = d3.select('.nodelabels').selectAll(".nodelabel");
-    vm.zoom = d3.zoom().scaleExtent([1, 16]).on("zoom", vm.zoomed)
-    vm.svg.call(vm.zoom).on("dblclick.zoom", null);
-    const { width, height } = vm.getContainerSize();
-    vm.simulation = d3.forceSimulation()
-      .force("link", d3.forceLink().id(function (d) { return d.id; }).distance(50))
-      .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .on("tick", vm.ticked);
+    vm.select = {
+      svg: d3.select("svg"),
+      graph: d3.select(".graph"),
+      links: d3.select(".links").selectAll(".link"),
+      edgepaths: d3.select(".edgepaths").selectAll(".edgepath"),
+      edgelabels: d3.select(".edgelabels").selectAll(".edgelabel"),
+      circles: d3.select(".nodes").selectAll(".circle"),
+      stars: d3.select(".nodes").selectAll(".star"),
+      nodelabels: d3.select('.nodelabels').selectAll(".nodelabel"),
+      arrowheads: d3.select('defs').selectAll('.arrowhead')
+    }
+
+    vm.zoom = d3.zoom().scaleExtent([1, 16]).on("zoom", vm.zoomed);
+    vm.select.svg.call(vm.zoom).on("dblclick.zoom", null);
 
     vm.zoomReset();
 
@@ -75,177 +146,250 @@ export default {
 
   },
   methods: {
-    draw() {
-
+    ...mapMutations([HIDE_PROGRESS_SPINNER]),
+    forceSimulation(callback) {
       const vm = this;
 
-      vm.simulation.stop();
+      const { width, height } = vm.getContainerSize();
+      const center = { x: width / 2, y: height / 2 };
 
-      const circleNodes = vm.nodesData.filter(function(node) { return !node.star })
-      const starNodes = vm.nodesData.filter(function(node) { return node.star })
+      const worker = Worker();
+      worker.postMessage({
+        center: center,
+        nodes: vm.nodes,
+        links: vm.links 
+      })
 
+      worker.onmessage = (event) => {
+        vm.nodes = event.data.nodes;
+        vm.links = event.data.links;
+        callback()
+      }
+
+    },
+    /**
+     * draw (or re-draw) the graph using d3.js
+     * @param {int} transitionDuration - The duration in ms of the transition between two states of the graph
+     */
+    draw(transitionDuration=1200) {
+      
+      const vm = this;
+    
+      const [starNodes, circleNodes] = vm.nodesByType
+
+      // Defines node and link keys that will be used in data binding
+      // see https://bost.ocks.org/mike/constancy/ 
       const linkKey = (d) => {
-        const source = d.source.entity ? d.source.entity : d.source;
-        const target = d.target.entity ? d.target.entity : d.target;
-        const k = `${source}-${target}`; 
-        return k;
+        return `${d.source.entity}-${d.target.entity}`; 
       }
 
       const nodeKey = (d) => {
         return d.entity;
       }
 
-      vm.links = vm.links.data(vm.linksData, linkKey);
+      // Create arrow heads used as marker-end to the links 
+      vm.select.arrowheads = vm.select.arrowheads.data(vm.links, linkKey);
 
-      vm.links
+      vm.select.arrowheads
         .exit()
         .transition()
-        .attr("stroke-opacity", 0)
-        .attrTween("x1", function (d) { return function () { return d.source.x; } })
-        .attrTween("x2", function (d) { return function () { return d.target.x; } })
-        .attrTween("y1", function (d) { return function () { return d.source.y; } })
-        .attrTween("y2", function (d) { return function () { return d.target.y; } })
+        .duration(transitionDuration)
+        .attr("opacity", 0)
         .remove();
 
-      const newLinks = vm.links.enter()
+      const newArrowHeads = vm.select.arrowheads.enter()
+        .append("marker")
+        .attr("class", "arrowhead")
+        .attr("viewBox", "-0 -5 10 10")
+        .attr("refX", "20")
+        .attr("refY", "0")
+        .attr("orient", "auto")
+        .attr("markerWidth", "3")
+        .attr("markerHeight", "3")
+        .attr("xoverflow", "visible")
+        
+      newArrowHeads.append("path")
+        .attr("d", "M 0,-5 L 10, 0 L 0, 5")
+
+      newArrowHeads.attr("opacity", "0")
+        .attr("opacity", 0)
+        .transition()
+        .duration(transitionDuration)
+        .attr("opacity", 0.5)
+
+      vm.select.arrowheads = newArrowHeads.merge(vm.select.arrowheads);
+
+      vm.select.arrowheads.attr('id', d => `arrowhead${linkKey(d)}`)
+
+      vm.select.links = vm.select.links.data(vm.links, linkKey);
+      
+      vm.select.links
+        .exit()
+        .transition()
+        .duration(transitionDuration)
+        .attr("x1", d => (d.source.entity in vm.nodesDict) ? vm.nodesDict[d.source.entity].x : d.source.x)
+        .attr("y1", d => (d.source.entity in vm.nodesDict) ? vm.nodesDict[d.source.entity].y : d.source.y)
+        .attr("x2", d => (d.target.entity in vm.nodesDict) ? vm.nodesDict[d.target.entity].x : d.target.x)
+        .attr("y2", d => (d.target.entity in vm.nodesDict) ? vm.nodesDict[d.target.entity].y : d.target.y)
+        .attr("stroke-opacity", 0)
+        .remove();
+
+      const newLinks = vm.select.links.enter()
         .append("line")
-        .call(function (link) { link.transition().attr("stroke-opacity", 0.2) })
         .attr("class", "link")
-        .on("mouseenter", vm.handleLinkMouseEnter)
-        .on("mouseout", vm.handleLinkMouseOut)
+        .attr("x1", d => vm.focusNode.x)
+        .attr("y1", d => vm.focusNode.y)
+        .attr("x2", d => vm.focusNode.x)
+        .attr("y2", d => vm.focusNode.y)
+        
+      vm.select.links = newLinks.merge(vm.select.links);
 
-      vm.links = newLinks.merge(vm.links);
+      vm.select.links.attr('marker-end', d => `url(#arrowhead${linkKey(d)})`)
 
-      vm.edgepaths = vm.edgepaths.data(vm.linksData, linkKey)
+      vm.select.links
+        .transition()
+        .duration(transitionDuration)
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y)
+        .attr("stroke-opacity", 0.2)
 
-      vm.edgepaths.exit().remove();
+      vm.select.edgepaths = vm.select.edgepaths.data(vm.links, linkKey)
 
-      vm.edgepaths = vm.edgepaths.enter()
+      vm.select.edgepaths
+        .exit()
+        .transition()
+        .duration(transitionDuration)
+        .remove();
+
+      const newEdgepaths = vm.select.edgepaths.enter()
         .append('path')
         .attr('class', 'edgepath')
-        .merge(vm.edgepaths)
-        .attr('id', function (d, i) { return 'edgepath' + i })
+      
+      vm.select.edgepaths = newEdgepaths.merge(vm.select.edgepaths)
+      vm.select.edgepaths.attr('id', d => `edgepath${linkKey(d)}`)
 
-      vm.edgelabels = vm.edgelabels.data(vm.linksData, linkKey);
+      vm.select.edgepaths
+        .transition()
+        .duration(transitionDuration)
+        .attr('d', d => `M${d.source.x} ${d.source.y}L ${d.target.x} ${d.target.y}`);
 
-      vm.edgelabels.exit().remove();
+      vm.select.edgelabels = vm.select.edgelabels.data(vm.links, linkKey);
 
-      const newEdgelabels = vm.edgelabels.enter()
+      vm.select.edgelabels
+        .exit()
+        .transition()
+        .duration(transitionDuration)
+        .remove();
+
+      vm.select.edgelabels
+        .exit()
+        .select('textPath')
+        .transition()
+        .duration(transitionDuration)
+        .attr('opacity', 0)
+        .remove()
+
+      const newEdgelabels = vm.select.edgelabels.enter()
         .append('text')
         .attr('class', 'edgelabel')
-
+      
       newEdgelabels.append('textPath')
         .attr('class', 'label')
         .attr('startOffset', '50%')
         .attr('text-anchor', 'middle')
-        .text(function (d) {
+        .attr('opacity', 0)
+        .text(d => {
           const rounded = Math.round(d.valeur_euro);
           const localized = rounded.toLocaleString('fr-FR');
           return `${localized}€ (${d.transactions.length})`;
-        });
-
-      vm.edgelabels = newEdgelabels.merge(vm.edgelabels)
-        .attr('id', function (d, i) { return 'edgelabel' + i })
-
-      vm.edgelabels.select("textPath")
-        .attr('xlink:href', function (d, i) { return '#edgepath' + i })
-
-      vm.circles = vm.circles.data(circleNodes, nodeKey);
-
-      vm.circles.exit().transition().attr("r", 0).remove();
-
-      const newCircles = vm.circles.enter()
-        .append("circle")
-        .attr("class", "node")
-        .classed("node-focus", d => {
-          return d.entity == vm.focusNodeEntity;
         })
-        .call(function (node) { node.transition().attr("r", 3); })
+        .transition()
+        .duration(transitionDuration)
+        .attr('opacity', 1)
+
+
+      vm.select.edgelabels = newEdgelabels.merge(vm.select.edgelabels)
+
+      vm.select.edgelabels.select("textPath")
+        .attr('xlink:href', d => `#edgepath${linkKey(d)}`)
+      
+      vm.select.edgelabels
+        .transition()
+        .duration(transitionDuration)
+        .attrTween('transform', function(d) {
+          const _this = this;
+          const f = () => {
+            if (d.target.x < d.source.x) {
+              const bbox = _this.getBBox();
+              const rx = bbox.x + bbox.width / 2;
+              const ry = bbox.y + bbox.height / 2;
+              return `rotate(180 ${rx} ${ry})`
+            }
+            else {
+              return 'rotate(0)';
+            }
+          }
+          return f;
+        })
+      
+      vm.select.circles = vm.select.circles.data(circleNodes, nodeKey);
+
+      vm.select.circles
+        .exit()
+        .transition()
+        .duration(transitionDuration)
+        .style("opacity", 0)
+        .remove();
+
+      const newCircles = vm.select.circles.enter()
+        .append("circle")
+      
+      newCircles
+        .attr("class", "node")
+        .attr("cx", d => vm.focusNode.x)
+        .attr("cy", d => vm.focusNode.y)
+        .attr("r", 3)
+        .classed("node-focus", d => d.entity == vm.focusNodeEntity)
         .on("click", vm.handleNodeClicked)
-        .on("dblclick", vm.handleNodeDblclick)
-        .call(d3.drag()
-          .on("start", vm.dragstarted)
-          .on("drag", vm.dragged)
-          .on("end", vm.dragended));
+        .call(d3.drag().on("drag", vm.dragged));
 
-      vm.circles = newCircles.merge(vm.circles);
+      vm.select.circles = newCircles.merge(vm.select.circles);
 
-      vm.stars = vm.stars.data(starNodes, nodeKey);
+      vm.select.circles
+        .transition()
+        .duration(transitionDuration)
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
 
-      vm.stars.exit().remove();
+      vm.select.stars = vm.select.stars.data(starNodes, nodeKey);
 
-      const newStars = vm.stars.enter()
+      vm.select.stars
+        .exit()
+        .transition()
+        .duration(transitionDuration)
+        .style("opacity", 0)
+        .remove();
+
+      const newStars = vm.select.stars.enter()
         .append("polygon")
         .attr("class", "node")
-        .on("click", vm.handleNodeClicked)
-        .on("dblclick", vm.handleNodeDblclick)
-        .call(d3.drag()
-          .on("start", vm.dragstarted)
-          .on("drag", vm.dragged)
-          .on("end", vm.dragended));
-
-      vm.stars = newStars.merge(vm.stars);
-
-      vm.nodelabels = vm.nodelabels.data(vm.nodesData, nodeKey);
-
-      vm.nodelabels.exit().remove();
-
-      const newNodeLabels = vm.nodelabels 
-        .enter()
-        .append("g")
-        .on("click", vm.handleNodeClicked)
-        .on("dblclick", vm.handleNodeDblclick)
-        .call(d3.drag()
-          .on("start", vm.dragstarted)
-          .on("drag", vm.dragged)
-          .on("end", vm.dragended));
-
-      newNodeLabels.append("text")
-        .attr("class", "label")
-        .attr("x", 0)
-        .attr("y", 0)
-        .style("text-anchor", "middle")
-        .text(function (d) {
-          return `${d.prenom} ${d.nom} (${d.degree})`;
+        .attr("points", function(d) {
+          var center = { x: vm.focusNode.x, y: vm.focusNode.y };
+          var coordinates = getStarCoordinates(center, 2, 5);
+          return coordinates.map(function(p){
+            return [p.x, p.y].join(",");
+          }).join(" ");
         })
+        .on("click", vm.handleNodeClicked)
+        .call(d3.drag().on("drag", vm.dragged));
 
-      vm.nodelabels = newNodeLabels.merge(vm.nodelabels)
+      vm.select.stars = newStars.merge(vm.select.stars);
 
-      vm.simulation
-        .nodes(vm.nodesData)
-        .on("tick", vm.ticked);
-      vm.simulation.force("link").links(vm.linksData)
-      vm.simulation.alpha(1).restart()
-
-
-    },
-    dragstarted: function (d) {
-      if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    },
-    dragged: function (d) {
-      d.fx = d3.event.x;
-      d.fy = d3.event.y;
-    },
-    dragended: function (d) {
-      if (!d3.event.active) this.simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
-    },
-    ticked() {
-      const vm = this;
-      vm.links
-        .attr("x1", function (d) { return d.source.x; })
-        .attr("y1", function (d) { return d.source.y; })
-        .attr("x2", function (d) { return d.target.x; })
-        .attr("y2", function (d) { return d.target.y; });
-
-      vm.circles
-        .attr("cx", function (d) { return d.x; })
-        .attr("cy", function (d) { return d.y; });
-
-      vm.stars
+      vm.select.stars
+        .transition()
+        .duration(transitionDuration)
         .attr("points", function(d) {
           var center = { x: d.x, y: d.y };
           var coordinates = getStarCoordinates(center, 2, 5);
@@ -254,39 +398,68 @@ export default {
           }).join(" ");
         })
 
-      vm.nodelabels
-        .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")" })
+      vm.select.nodelabels = vm.select.nodelabels.data(vm.nodes, nodeKey);
 
-      vm.edgepaths.attr('d', function (d) {
-        return 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y;
-      });
+      vm.select.nodelabels    
+        .exit()
+        .transition()
+        .duration(transitionDuration)
+        .remove();
 
-      vm.edgelabels.attr('transform', function (d) {
-        if (d.target.x < d.source.x) {
-          const bbox = this.getBBox();
-          const rx = bbox.x + bbox.width / 2;
-          const ry = bbox.y + bbox.height / 2;
-          return 'rotate(180 ' + rx + ' ' + ry + ')';
-        }
-        else {
-          return 'rotate(0)';
-        }
-      });
+      vm.select.nodelabels    
+        .exit()
+        .select("text")
+        .transition()
+        .duration(transitionDuration)
+        .attr("opacity", 0)
+        .remove();
+
+      const newNodeLabels = vm.select.nodelabels 
+        .enter()
+        .append("g")
+        .attr("class", "nodelabel")
+        .on("click", vm.handleNodeClicked)
+        .call(d3.drag().on("drag", vm.dragged));
+
+      newNodeLabels.append("text")
+        .attr("class", "label")
+        .attr("x", () => vm.focusNode.x)
+        .attr("y", () => vm.focusNode.y)
+        .attr("opacity", 0)
+        .style("text-anchor", "middle")
+        .text(function (d) {
+          return `${d.prenom} ${d.nom} (${d.degree})`;
+        })
+
+      vm.select.nodelabels = newNodeLabels.merge(vm.select.nodelabels)
+
+      vm.select.nodelabels
+        .select("text")
+        .transition()
+        .duration(transitionDuration)
+        .attr("x", d => d.x)
+        .attr("y", d => d.y)
+        .attr("opacity", 1)
+    },
+    dragged: function (d) {
+      d.x = d3.event.x; 
+      d.y = d3.event.y;
+      this.draw({ transitionDuration: 0 });
     },
     zoomed() {
-      if (this.graph) {
-        this.graph.attr("transform", d3.event.transform);
+      if (this.select.graph) {
+        this.select.graph.attr("transform", d3.event.transform);
       }
     },
     zoomIn: function(){
-      this.zoom.scaleBy(this.svg.transition().duration(200), 1.2);
+      this.zoom.scaleBy(this.select.svg.transition().duration(200), 1.2);
     },
     zoomOut: function(){
-      this.zoom.scaleBy(this.svg.transition().duration(200), 1 / 1.2);
+      this.zoom.scaleBy(this.select.svg.transition().duration(200), 1 / 1.2);
     },
     zoomReset: function(){
-      this.svg.call(this.zoom.transform, d3.zoomIdentity);
-      this.zoom.scaleTo(this.svg.transition(), 2.5);
+      this.select.svg.call(this.zoom.transform, d3.zoomIdentity);
+      this.zoom.scaleTo(this.select.svg.transition(), 2.5);
     },
     handleNodeClicked(node) {
       this.$store.commit(UPDATE_FOCUS_NODE, node.entity)
@@ -297,10 +470,10 @@ export default {
     },
     updateFocusNode() {
       const vm = this;
-      vm.circles.classed("node-focus", d => {
+      vm.select.circles.classed("node-focus", d => {
         return d.entity == vm.focusNodeEntity;
       });
-      vm.stars.classed("node-focus", d => {
+      vm.select.stars.classed("node-focus", d => {
         return d.entity == vm.focusNodeEntity;
       });
     },
@@ -328,6 +501,11 @@ export default {
   z-index: 1;
 }
 
+.arrowhead path {
+  fill: $asbestos;
+}
+
+
 .node, .triangle {
   fill: $peter-river;
   opacity: 0.5;
@@ -341,11 +519,13 @@ export default {
   opacity: 1;
 }
 
+
 .link {
-  marker-end: url(#arrowhead);
   stroke: $asbestos;
   stroke-width: 1;
 }
+
+
 
 .edgepath {
   fill-opacity: 0;

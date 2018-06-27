@@ -1,7 +1,6 @@
 export const UPDATE_FILTER = 'UPDATE_FILTER';
 export const UPDATE_FOCUS_NODE = 'UPDATE_FOCUS_NODE';
-export const UPDATE_NODES = 'UPDATE_NODES';
-export const UPDATE_LINKS = 'UPDATE_LINKS';
+export const UPDATE_GRAPH = 'UPDATE_GRAPH';
 export const SHOW_MODAL = 'SHOW_MODAL';
 export const HIDE_MODAL = 'HIDE_MODAL';
 export const SHOW_PROGRESS_SPINNER = 'SHOW_PROGRESS_SPINNER';

@@ -23,6 +23,7 @@ import ModalLinksDetail from "./ModalLinksDetail.vue";
 import ProgressSpinner from "./ProgressSpinner";
 import { mapActions, mapState } from 'vuex';
 
+
 export default {
   name: "app",
   components: {Search, FilterList, Drawer, Graph, ZoomWidget, Modal, ModalLinksDetail, ProgressSpinner },
