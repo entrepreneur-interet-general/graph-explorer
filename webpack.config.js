@@ -56,6 +56,13 @@ module.exports = {
         }
       },
       {
+        test: /\.worker\.js$/,
+        loader: 'worker-loader', 
+        options: {
+          name: './static/graph-explorer-0.3/worker.js' 
+        }
+      },
+      {
         test: /\.js$/,
         loader: 'babel-loader',
         exclude: /node_modules/
@@ -66,10 +73,6 @@ module.exports = {
         options: {
           name: './static/graph-explorer-0.3/[name].[ext]?[hash]'
         }
-      },
-      {
-        test: /\.worker\.js$/,
-        use: { loader: 'worker-loader' }
       }
     ]
   },
