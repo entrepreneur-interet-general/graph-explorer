@@ -171,7 +171,7 @@ export default {
      * draw (or re-draw) the graph using d3.js
      * @param {int} transitionDuration - The duration in ms of the transition between two states of the graph
      */
-    draw(transitionDuration=1200) {
+    draw(transitionDuration=1500) {
       
       const vm = this;
     
@@ -261,12 +261,20 @@ export default {
         .exit()
         .transition()
         .duration(transitionDuration)
+        .attr('d', d => {
+          const xSource = (d.source.entity in vm.nodesDict) ? vm.nodesDict[d.source.entity].x : d.source.x;
+          const ySource = (d.source.entity in vm.nodesDict) ? vm.nodesDict[d.source.entity].y : d.source.y;
+          const xTarget = (d.target.entity in vm.nodesDict) ? vm.nodesDict[d.target.entity].x : d.target.x;
+          const yTarget = (d.target.entity in vm.nodesDict) ? vm.nodesDict[d.target.entity].y : d.target.y;
+          return `M${xSource} ${ySource}L ${xTarget} ${yTarget}`;
+        })
         .remove();
 
       const newEdgepaths = vm.select.edgepaths.enter()
         .append('path')
         .attr('class', 'edgepath')
-      
+        .attr('d', () => `M${vm.focusNode.x} ${vm.focusNode.y}L ${vm.focusNode.x} ${vm.focusNode.y}`)
+
       vm.select.edgepaths = newEdgepaths.merge(vm.select.edgepaths)
       vm.select.edgepaths.attr('id', d => `edgepath${linkKey(d)}`)
 
@@ -281,6 +289,24 @@ export default {
         .exit()
         .transition()
         .duration(transitionDuration)
+        .style('opacity', 0)
+        .attrTween('transform', function(d) {
+          const _this = this;
+          const xSource = d.source.entity in vm.nodesDict ? vm.nodesDict[d.source.entity].x : d.source.x;
+          const xTarget = d.target.entity in vm.nodesDict ? vm.nodesDict[d.target.entity].x : d.target.x;
+          const f = () => {
+            if (xTarget < xSource) {
+              const bbox = _this.getBBox();
+              const rx = bbox.x + bbox.width / 2;
+              const ry = bbox.y + bbox.height / 2;
+              return `rotate(180 ${rx} ${ry})`
+            }
+            else {
+              return 'rotate(0)';
+            }
+          }
+          return f;
+        })
         .remove();
 
       vm.select.edgelabels
@@ -288,18 +314,17 @@ export default {
         .select('textPath')
         .transition()
         .duration(transitionDuration)
-        .attr('opacity', 0)
         .remove()
 
       const newEdgelabels = vm.select.edgelabels.enter()
         .append('text')
         .attr('class', 'edgelabel')
+        .style('opacity', 0)
       
       newEdgelabels.append('textPath')
         .attr('class', 'label')
         .attr('startOffset', '50%')
         .attr('text-anchor', 'middle')
-        .attr('opacity', 0)
         .text(d => {
           const rounded = Math.round(d.valeur_euro);
           const localized = rounded.toLocaleString('fr-FR');
@@ -307,8 +332,6 @@ export default {
         })
         .transition()
         .duration(transitionDuration)
-        .attr('opacity', 1)
-
 
       vm.select.edgelabels = newEdgelabels.merge(vm.select.edgelabels)
 
@@ -318,6 +341,7 @@ export default {
       vm.select.edgelabels
         .transition()
         .duration(transitionDuration)
+        .style('opacity', 1)
         .attrTween('transform', function(d) {
           const _this = this;
           const f = () => {
@@ -519,13 +543,10 @@ export default {
   opacity: 1;
 }
 
-
 .link {
   stroke: $asbestos;
   stroke-width: 1;
 }
-
-
 
 .edgepath {
   fill-opacity: 0;
