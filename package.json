@@ -1,7 +1,7 @@
 {
   "name": "graph-explorer",
   "description": "Explore and find suspicious activities in a graph of money transactions",
-  "version": "1.0.0",
+  "version": "0.3.1",
   "author": "benoitguigal <benoit.guigal@gmail.com>",
   "license": "MIT",
   "private": true,
