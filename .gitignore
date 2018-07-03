@@ -14,3 +14,20 @@ MANIFEST
 # Local configuration 
 .python-version
 .vscode
+.editorconfig
+
+.DS_Store
+node_modules/
+dist/
+local/
+npm-debug.log
+yarn-error.log
+.nvmrc
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
