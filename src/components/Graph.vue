@@ -10,6 +10,7 @@
         <g class="edgepaths"></g>
         <g class="edgelabels"></g>
         <g class="nodes"></g>
+        <g class="flags"></g>
         <g class="nodelabels"></g>
       </g>
     </svg>
@@ -26,6 +27,14 @@ import api from "../api";
 import { getStarCoordinates, array2dict } from "../utils";
 import { UPDATE_FOCUS_NODE, HIDE_PROGRESS_SPINNER } from "../mutation-types";
 import Worker from '../force.worker.js';
+
+function importAll(r) {
+  let images = {};
+  r.keys().map((item, index) => { images[item.replace('./', '')] = r(item); });
+  return images;
+}
+
+const flags = importAll(require.context('../flags', false, /\.(svg)$/));
 
 export default {
   data() {
@@ -122,6 +131,7 @@ export default {
       edgepaths: d3.select(".edgepaths").selectAll(".edgepath"),
       edgelabels: d3.select(".edgelabels").selectAll(".edgelabel"),
       circles: d3.select(".nodes").selectAll(".circle"),
+      flags: d3.select(".flags").selectAll(".flag"),
       stars: d3.select(".nodes").selectAll(".star"),
       nodelabels: d3.select('.nodelabels').selectAll(".nodelabel"),
       arrowheads: d3.select('defs').selectAll('.arrowhead')
@@ -357,7 +367,42 @@ export default {
           }
           return f;
         })
-      
+
+      vm.select.flags = vm.select.flags.data(vm.nodes, nodeKey)
+
+      vm.select.flags
+        .exit()
+        .transition()
+        .duration(transitionDuration)
+        .style("opacity", 0)
+        .remove();
+
+      const newFlags = vm.select.flags.enter()
+        .append("image")
+        .attr("class", "flag")
+        .attr("width", 4)
+        .attr("height", 4)
+        .style("opacity", 0)
+        .attr("x", d => vm.focusNode.x)
+        .attr("y", d => vm.focusNode.y)
+        .attr("xlink:href", d => {
+          if (d.pays_code) {
+            const filename = `${d.pays_code.toLowerCase()}.svg`
+            return flags[filename];
+          }
+        });
+
+      newFlags.on("click", vm.handleNodeClicked)
+
+      vm.select.flags = newFlags.merge(vm.select.flags);
+
+      vm.select.flags
+        .transition()
+        .duration(transitionDuration)
+        .attr("x", d => d.x)
+        .attr("y", d => d.y)
+        .style("opacity", 1)
+
       vm.select.circles = vm.select.circles.data(circleNodes, nodeKey);
 
       vm.select.circles
@@ -536,7 +581,7 @@ export default {
   opacity: 0.5;
 }
 
-.node, .node-label {
+.node, .node-label, .flag {
   cursor: pointer;
 }
 
