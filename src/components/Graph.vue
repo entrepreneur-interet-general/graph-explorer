@@ -34,7 +34,7 @@ function importAll(r) {
   return images;
 }
 
-const flags = importAll(require.context('../flags', false, /\.(svg)$/));
+const flags = importAll(require.context('../flags', false, /\.(png)$/));
 
 export default {
   data() {
@@ -387,7 +387,7 @@ export default {
         .attr("y", d => vm.focusNode.y)
         .attr("xlink:href", d => {
           if (d.pays_code) {
-            const filename = `${d.pays_code.toLowerCase()}.svg`
+            const filename = `${d.pays_code.toUpperCase()}.png`
             return flags[filename];
           }
         });
