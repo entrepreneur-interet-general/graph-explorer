@@ -8,6 +8,7 @@ Explore and find suspicious patterns in a graph of money transactions
 ```
 git clone git@github.com:entrepreneur-interet-general/graph-explorer.git
 cd graph-explorer
+npm run watch
 pip install requirements.txt
 FLASK_APP=app.py python -m flask run 
 ```

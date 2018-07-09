@@ -452,7 +452,8 @@ export default {
         .attr("opacity", 0)
         .style("text-anchor", "middle")
         .text(function (d) {
-          return `${d.prenom} ${d.nom} (${d.degree})`;
+          return `${d.entity} (${d.degree})`
+          //return `${d.prenom} ${d.nom} (${d.degree})`;
         })
 
       vm.select.nodelabels = newNodeLabels.merge(vm.select.nodelabels)
