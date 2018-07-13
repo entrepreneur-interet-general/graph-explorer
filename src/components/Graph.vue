@@ -34,7 +34,7 @@ function importAll(r) {
   return images;
 }
 
-const flags = importAll(require.context('../flags', false, /\.(png)$/));
+const flags = importAll(require.context('../flags_svg', false, /\.(svg)$/));
 
 export default {
   data() {
@@ -381,13 +381,13 @@ export default {
         .append("image")
         .attr("class", "flag")
         .attr("width", 4)
-        .attr("height", 4)
+        .attr("height", 3)
         .style("opacity", 0)
         .attr("x", d => vm.focusNode.x)
         .attr("y", d => vm.focusNode.y)
         .attr("xlink:href", d => {
           if (d.pays_code) {
-            const filename = `${d.pays_code.toUpperCase()}.png`
+            const filename = `${d.pays_code.toLowerCase()}.svg`
             return flags[filename];
           }
         });
@@ -497,8 +497,7 @@ export default {
         .attr("opacity", 0)
         .style("text-anchor", "middle")
         .text(function (d) {
-          return `${d.entity} (${d.degree})`
-          //return `${d.prenom} ${d.nom} (${d.degree})`;
+          return `${d.prenom} ${d.nom} (${d.degree})`;
         })
 
       vm.select.nodelabels = newNodeLabels.merge(vm.select.nodelabels)
