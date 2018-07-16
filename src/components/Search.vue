@@ -11,6 +11,9 @@
 <script>
 import api from "../api";
 import { mapActions } from 'vuex';
+import { debounce } from '../utils';
+
+const debouncedSearch = debounce(api.search, 800, {leading: true});
 
 export default {
   data() {
@@ -23,7 +26,7 @@ export default {
   },
   methods: {
     search(searchTerm) {
-      this.people = api.search(searchTerm);
+      this.people = debouncedSearch(searchTerm);
     },
     handleSelected(person){
       this.value = person.prenom_nom;
