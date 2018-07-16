@@ -3,7 +3,7 @@
     <label>Rechercher</label>
     <md-icon id="ic-search">search</md-icon>
     <template slot="md-autocomplete-item" slot-scope="{ item, term }">
-      <md-highlight-text :md-term="term">{{ item.prenom_nom + " #" + item.entity}}</md-highlight-text>
+      {{ item.prenom_nom + " #" + item.entity}}
     </template>
   </md-autocomplete>
 </template>
