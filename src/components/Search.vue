@@ -26,7 +26,8 @@ export default {
   },
   methods: {
     search(searchTerm) {
-      this.people = debouncedSearch(searchTerm);
+      const options = { params: { search_term: searchTerm } }
+      this.people = debouncedSearch(options);
     },
     handleSelected(person){
       this.value = person.prenom_nom;

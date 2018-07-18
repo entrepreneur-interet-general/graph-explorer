@@ -14,6 +14,18 @@ for n in G:
     G.node[n]["in_degree"] = G.in_degree(n, "valeur_euro")
     G.node[n]["out_degree"] = G.out_degree(n, "valeur_euro")
 
+# Dummy transactions 
+transactions = []
+with open("./data/transactions.csv", 'r') as f:
+    columns = f.readline().rstrip().split(',')
+    rows = [line.rstrip().split(',') for line in f.readlines()]
+    for row in rows:
+        transaction = dict(zip(columns, row))
+        transaction["ben_entity"] = int(transaction["ben_entity"])
+        transaction["don_entity"] = int(transaction["don_entity"])
+        transaction["valeur_euro"] = float(transaction["don_entity"])
+        transactions.append(transaction)
+
 @app.route("/")
 def home():
     return send_file('index.html')
@@ -22,6 +34,18 @@ def home():
 @app.route('/dist/<path:path>')
 def send_static(path):
     return send_from_directory('dist', path)
+
+
+@app.route('/transactions')
+def get_transactions():
+    """ Returns all the transactions of a given entity """
+    node = request.args.get("node")
+    node = int(node)
+    filtered = [transaction for \
+        transaction in transactions if \
+        (transaction["ben_entity"] == node or \
+        transaction["don_entity"] == node)]
+    return jsonify(filtered)
 
 
 @app.route('/neighbors')

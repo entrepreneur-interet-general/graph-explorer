@@ -5,7 +5,7 @@
     <drawer></drawer>
     <graph></graph>
     <zoom-widget></zoom-widget>
-    <modal v-show="showModal">
+    <modal v-if="showModal">
       <modal-links-detail></modal-links-detail>
     </modal>
     <progress-spinner v-show="showProgressSpinner"></progress-spinner>
@@ -37,7 +37,7 @@ export default {
     ...mapActions(['expand'])
   },
   mounted() {
-    //this.expand(19336) // 19336 = Jill Sanchez, 23709 Jasmine Calderon 
+    // this.expand(19336) // 19336 = Jill Sanchez, 23709 Jasmine Calderon 
   }
 };
 </script>

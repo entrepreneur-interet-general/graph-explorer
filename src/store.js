@@ -23,7 +23,22 @@ export default new Vuex.Store({
       return state.G.nodes(true).map(([_, node]) => node);
     },
     links(state) {
-      return state.G.edges(true).map(([_1, _2, edge]) => edge);
+      const links = state.G.edges(true).map(([_1, _2, edge]) => edge);
+      // aggregates parallel edges when a pair of nodes (source, target) 
+      // has several transactions associated
+      const aggregated = links.reduce((rv, x) => {
+        const groupKey = `${x["source"]},${x["target"]}`;
+        rv[groupKey] = rv[groupKey] || { 
+          source: x["source"], 
+          target: x["target"], 
+          valeur_euro: 0,
+          number_of_links: 0
+        };
+        rv[groupKey].valeur_euro = rv[groupKey].valeur_euro + x["valeur_euro"];
+        rv[groupKey].number_of_links= rv[groupKey].number_of_links + 1;
+        return rv;
+      }, {});
+      return Object.values(aggregated);
     },
     focusNode(state) {
       if (state.focusNodeEntity) {
@@ -32,14 +47,6 @@ export default new Vuex.Store({
           .find(n => n.entity == state.focusNodeEntity) 
       }
       return null;
-    },
-    focusNodeLinks(state) {
-      if (state.focusNodeEntity) {
-        const H = state.G.toUndirected();
-        const edges = H.edges(state.focusNodeEntity, true).map(([_1, _2, edge]) => edge);
-        return edges;
-      }
-      return [];
     }
   },
   mutations: {
@@ -89,9 +96,7 @@ export default new Vuex.Store({
           }
         });
         links.forEach(link => {
-          if (!G.hasEdge(link.source, link.target)){
-            G.addEdge(link.source, link.target, link)
-          }
+          G.addEdge(link.source, link.target, link);
         })
         commit(UPDATE_GRAPH, G);
         commit(UPDATE_FOCUS_NODE, entity);

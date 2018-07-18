@@ -338,7 +338,7 @@ export default {
         .text(d => {
           const rounded = Math.round(d.valeur_euro);
           const localized = rounded.toLocaleString('fr-FR');
-          return `${localized}€ (${d.transactions.length})`;
+          return `${localized}€ (${d.number_of_links})`;
         })
         .transition()
         .duration(transitionDuration)
