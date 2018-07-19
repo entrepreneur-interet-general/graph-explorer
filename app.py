@@ -9,10 +9,6 @@ app = Flask(__name__, static_folder="local")
 
 # Dummy graph
 G = nx.read_gpickle('./data/graph.p')
-for n in G:
-    G.node[n]["degree"] = G.degree(n)
-    G.node[n]["in_degree"] = G.in_degree(n, "valeur_euro")
-    G.node[n]["out_degree"] = G.out_degree(n, "valeur_euro")
 
 # Dummy transactions 
 transactions = []

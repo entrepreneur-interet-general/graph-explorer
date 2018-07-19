@@ -49,7 +49,7 @@ for n in G.nodes():
     prenom = G.node[n]['prenom']
     nom = G.node[n]['nom']
     G.node[n]['prenom_nom'] = "%s %s" % (prenom, nom)
-    G.node[n]['degree'] = G.degree(n)
+    G.node[n]['degree'] = len(list(nx.all_neighbors(G, n)))
     G.node[n]['in_degree_weighted'] = G.in_degree(n, weight="valeur_euro")
     G.node[n]['out_degree_weighted'] = G.out_degree(n, weight="valeur_euro")
 

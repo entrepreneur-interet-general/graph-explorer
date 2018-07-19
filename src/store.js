@@ -111,7 +111,7 @@ export default new Vuex.Store({
     collapse({ commit, state }, entity) {
       let G = state.G.toUndirected();
       const neighbors = G.neighbors(entity);
-      const leafs = neighbors.filter(n => G.degree(n) == 1)
+      const leafs = neighbors.filter(n => G.neighbors(n).length == 1)
       G.removeNodesFrom(leafs);
       commit(UPDATE_GRAPH, G);
     }
