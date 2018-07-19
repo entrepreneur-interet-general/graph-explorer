@@ -380,8 +380,8 @@ export default {
       const newFlags = vm.select.flags.enter()
         .append("image")
         .attr("class", "flag")
-        .attr("width", 4)
-        .attr("height", 3)
+        .attr("width", 3)
+        .attr("height", 2.25)
         .style("opacity", 0)
         .attr("x", d => vm.focusNode.x)
         .attr("y", d => vm.focusNode.y)
@@ -400,7 +400,7 @@ export default {
         .transition()
         .duration(transitionDuration)
         .attr("x", d => d.x)
-        .attr("y", d => d.y)
+        .attr("y", d => d.y + 0.5)
         .style("opacity", 1)
 
       vm.select.circles = vm.select.circles.data(circleNodes, nodeKey);
