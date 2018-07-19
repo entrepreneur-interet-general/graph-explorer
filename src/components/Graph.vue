@@ -34,7 +34,7 @@ function importAll(r) {
   return images;
 }
 
-const flags = importAll(require.context('../flags_svg', false, /\.(svg)$/));
+const flags = importAll(require.context('../flags', false, /\.(svg)$/));
 
 export default {
   data() {
