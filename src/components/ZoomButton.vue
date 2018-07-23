@@ -1,12 +1,13 @@
 <template>
   <div class="zoom-button">
-  <md-button @click="handleClick" id="widget-zoom-out">
-    <md-icon><slot></slot></md-icon>
-  </md-button>
+    <md-button @click="handleClick">
+      <md-icon><slot></slot></md-icon>
+    </md-button>
   </div>
 </template>
 
 <script>
+
 export default {
   methods: {
     handleClick(){

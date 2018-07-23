@@ -5,6 +5,7 @@
     <drawer></drawer>
     <graph></graph>
     <zoom-widget></zoom-widget>
+    <share-button></share-button>
     <modal v-show="showModal">
       <modal-links-detail></modal-links-detail>
     </modal>
@@ -18,6 +19,7 @@ import FilterList from "./FilterList.vue";
 import Drawer from "./Drawer.vue";
 import Graph from "./Graph.vue";
 import ZoomWidget from "./ZoomWidget.vue";
+import ShareButton from "./ShareButton.vue";
 import Modal from "./Modal.vue";
 import ModalLinksDetail from "./ModalLinksDetail.vue";
 import ProgressSpinner from "./ProgressSpinner";
@@ -26,7 +28,7 @@ import { mapActions, mapState } from 'vuex';
 
 export default {
   name: "app",
-  components: {Search, FilterList, Drawer, Graph, ZoomWidget, Modal, ModalLinksDetail, ProgressSpinner },
+  components: {Search, FilterList, Drawer, Graph, ZoomWidget, ShareButton, Modal, ModalLinksDetail, ProgressSpinner },
   computed: {
     filter() {
       return this.$store.state.filter;

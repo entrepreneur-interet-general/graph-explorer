@@ -5,7 +5,7 @@
       <defs></defs>
       <!-- Main containers for the d3.js force directed graph. 
 			They will be populated dynamically by d3.js -->
-      <g class="graph">
+      <g class="graph" id="graph">
         <g class="links"></g>
         <g class="edgepaths"></g>
         <g class="edgelabels"></g>
