@@ -13,9 +13,9 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(entry, index) in filteredData" :key=index>
-        <td v-for="(key, index) in columns" :key=index>
-          {{entry[key]}}
+      <tr v-for="(row, index) in sortedRows" :key=index>
+        <td v-for="(cell, index) in row" :key=index>
+          {{cell}}
         </td>
       </tr>
     </tbody>
@@ -25,41 +25,38 @@
 <script>
 export default {
   props: {
-    data: Array,
     columns: Array,
-    filterKey: String
+    rows: Array
   },
   data() {
-    let sortOrders = {}
-    this.columns.forEach(function (key) {
-      sortOrders[key] = 1
-    })
     return {
-      sortOrders: sortOrders,
+      sortOrders: {},
       sortKey: ''
     }
   },
+  watch: {
+    columns: function(){
+      var vm = this;
+      this.columns.forEach(function (key) {
+        vm.$set(vm.sortOrders, key, 1)
+      });
+    }
+  },
   computed: {
-    filteredData: function () {
-      var sortKey = this.sortKey
-      var filterKey = this.filterKey && this.filterKey.toLowerCase()
-      var order = this.sortOrders[sortKey] || 1
-      var data = this.data
-      if (filterKey) {
-        data = data.filter(function (row) {
-          return Object.keys(row).some(function (key) {
-            return String(row[key]).toLowerCase().indexOf(filterKey) > -1
-          })
-        })
-      }
+    sortedRows: function () {
+      var sortKey = this.sortKey;
+      var order = this.sortOrders[sortKey] || 1;
+      var filterKey = this.filterKey;
+      var rows = this.rows
       if (sortKey) {
-        data = data.slice().sort(function (a, b) {
-          a = a[sortKey]
-          b = b[sortKey]
+        var sortKeyIdx = this.columns.indexOf(sortKey);
+        rows = rows.slice().sort(function (a, b) {
+          a = a[sortKeyIdx]
+          b = b[sortKeyIdx]
           return (a === b ? 0 : a > b ? 1 : -1) * order
         })
       }
-      return data
+      return rows
     }
   },
   filters: {

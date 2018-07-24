@@ -11,16 +11,13 @@ app = Flask(__name__, static_folder="local")
 G = nx.read_gpickle('./data/graph.p')
 
 # Dummy transactions 
-transactions = []
 with open("./data/transactions.csv", 'r') as f:
     columns = f.readline().rstrip().split(',')
     rows = [line.rstrip().split(',') for line in f.readlines()]
-    for row in rows:
-        transaction = dict(zip(columns, row))
-        transaction["ben_entity"] = int(transaction["ben_entity"])
-        transaction["don_entity"] = int(transaction["don_entity"])
-        transaction["valeur_euro"] = float(transaction["don_entity"])
-        transactions.append(transaction)
+    transactions = {
+        "columns": columns,
+        "rows": rows
+    }
 
 @app.route("/")
 def home():
@@ -36,12 +33,18 @@ def send_static(path):
 def get_transactions():
     """ Returns all the transactions of a given entity """
     node = request.args.get("node")
-    node = int(node)
-    filtered = [transaction for \
-        transaction in transactions if \
-        (transaction["ben_entity"] == node or \
-        transaction["don_entity"] == node)]
-    return jsonify(filtered)
+    
+    ben_entity_idx = columns.index("ben_entity_id")
+    don_entity_idx = columns.index("don_entity_id")
+
+    rows = [row for \
+        row in transactions["rows"] if \
+        (row[ben_entity_idx] == node or \
+        row[don_entity_idx] == node)]
+
+    response = { "columns": columns, "rows": rows }
+
+    return jsonify(response)
 
 
 @app.route('/neighbors')
