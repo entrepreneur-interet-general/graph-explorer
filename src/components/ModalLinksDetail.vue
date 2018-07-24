@@ -6,7 +6,7 @@
 
 <script>
 import AppTable from './AppTable.vue';
-import { mapGetters, mapMutations } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
 import { SHOW_PROGRESS_SPINNER, HIDE_PROGRESS_SPINNER } from "../mutation-types";
 import api from '../api';
 
@@ -45,7 +45,7 @@ export default {
     }
   },
   mounted() {
-    const options = { params: { node: 19336 } };
+    const options = { params: { node: this.focusNodeEntity } };
     const vm = this;
     vm.SHOW_PROGRESS_SPINNER()
     api.transactions(options, data => {
@@ -54,7 +54,7 @@ export default {
     })
   },
   computed: {
-    ...mapGetters(["focusNodeLinks"]),
+    ...mapState(["focusNodeEntity"]),
   },
   methods: {
     ...mapMutations([SHOW_PROGRESS_SPINNER, HIDE_PROGRESS_SPINNER])

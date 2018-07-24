@@ -5,13 +5,13 @@
       <div class="table-row">
         <label class="table-cell">Total reçu</label>
         <span class="table-cell">
-          {{`${focusNode.in_degree_weighted}€`}}
+          {{`${parseInt(focusNode.in_degree_weighted)}€`}}
         </span>
       </div>
       <div class="table-row">
         <label class="table-cell">Total envoyé</label>
         <span class="table-cell">
-          {{`${focusNode.out_degree_weighted}€`}}
+          {{`${parseInt(focusNode.out_degree_weighted)}€`}}
         </span>
       </div>
     </div>
