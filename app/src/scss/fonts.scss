@@ -1,0 +1,44 @@
+  /* roboto-mono-regular - latin */
+  @font-face {
+    font-family: "Roboto Mono";
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/roboto-mono-v5-latin/roboto-mono-v5-latin-regular.eot"); /* IE9 Compat Modes */
+    src: local("Roboto Mono"), local("RobotoMono-Regular"),
+      url("../fonts/roboto-mono-v5-latin/roboto-mono-v5-latin-regular.eot?#iefix")
+        format("embedded-opentype"),
+      /* IE6-IE8 */
+        url("../fonts/roboto-mono-v5-latin/roboto-mono-v5-latin-regular.woff2")
+        format("woff2"),
+      /* Super Modern Browsers */
+        url("../fonts/roboto-mono-v5-latin/roboto-mono-v5-latin-regular.woff")
+        format("woff"),
+      /* Modern Browsers */
+        url("../fonts/roboto-mono-v5-latin/roboto-mono-v5-latin-regular.ttf")
+        format("truetype"),
+      /* Safari, Android, iOS */
+        url("../fonts/roboto-mono-v5-latin/roboto-mono-v5-latin-regular.svg#RobotoMono")
+        format("svg"); /* Legacy iOS */
+  }
+
+
+  @font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/material-icons/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2") format('truetype');
+  }
+  
+  .material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+  }

@@ -1,33 +1,3 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Distribution / packaging
-.Python
-.eggs/
-wheels/
-*.egg-info/
-*.egg
-MANIFEST
-
-# Local configuration 
-.python-version
 .vscode
-.editorconfig
 
-.DS_Store
-node_modules/
-dist/
-local/
-npm-debug.log
-yarn-error.log
-.nvmrc
-
-# Editor directories and files
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
 
