@@ -1,6 +1,6 @@
 FROM openjdk:8-jdk
 
-ARG version=0.2.1
+ARG version=0.2.0
 ARG hadoop=hadoop2
 
 RUN apt-get update && \
@@ -14,7 +14,7 @@ RUN apt-get update && \
     mv janusgraph-* janusgraph
 
 WORKDIR /workspace/janusgraph
-RUN bin/gremlin-server.sh -i org.apache.tinkerpop gremlin-python 3.2.9
+RUN bin/gremlin-server.sh -i org.apache.tinkerpop gremlin-python 3.2.6
 
 COPY ./run.sh /workspace/janusgraph/bin
 COPY ./gremlin-server.yaml /workspace/janusgraph/conf/gremlin-server/gremlin-server.yaml
