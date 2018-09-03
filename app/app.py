@@ -142,20 +142,10 @@ def search():
     search_term = request.args.get("search_term")
     matches = []
     if search_term:
-        # See Elasticsearch Query String Query 
-        lucene_query = "%s~1" % search_term
-        # See JanusGraph Direct Index Query 
-        # Because this feature is Janus specific and not tied to Gremlin
-        # we cannot use the python-gremlin graph object.
-        # We use the low level client instead to submit a raw query 
-        raw_query = "graph.indexQuery('vertexByPrenomNom', 'v.prenomnom:%s')\
-            .limit(10).vertices()" % lucene_query
-        vertices = janus_client.submit(raw_query).all().result() 
-        elements = [v["element"] for v in vertices]
-        vertices_properties = g.V(elements).valueMap().toList()
-        
+        query = "g.V().has('prenomnom', textContainsFuzzy('%s')).limit(10).valueMap()" % search_term
+        vertices = janus_client.submit(query).all().result() 
         # vertices properties are array like {"entity": [12568]},
         # format them to {"entity": 12568}
-        matches = [format_properties(vp) for vp in vertices_properties]
+        matches = [format_properties(vp) for vp in vertices]
 
     return jsonify(matches)
