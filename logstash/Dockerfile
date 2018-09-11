@@ -14,9 +14,5 @@ WORKDIR /workspace/logstash
 
 COPY ./logstash.conf /workspace/logstash 
 COPY ./data/transactions.csv /workspace/logstash/data 
-COPY ./wait-for-it.sh /workspace/logstash/bin
-COPY ./run.sh /workspace/logstash/bin
 
-RUN chmod +x /workspace/logstash/bin/wait-for-it.sh
-
-CMD [ "/bin/bash", "-e", "/workspace/logstash/bin/run.sh" ]
+CMD ["bin/logstash", "-f", "logstash.conf"]
