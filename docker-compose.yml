@@ -18,12 +18,13 @@ services:
       args:
         version: 0.2.1
         hadoop: hadoop2
-      context: ./janusgraph
+      context: ./janus
     ports:
       - "8182:8182"
       - "8184:8184"
     depends_on:
       - elasticsearch
+      - scylladb
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.0.1
     environment: 
@@ -34,6 +35,27 @@ services:
     ports:
      - "9200:9200"
      - "9300:9300"
+    volumes:
+    - "./data/elasticsearch:/usr/share/elasticsearch/data"
+  scylladb:
+    image: scylladb/scylla:2.2.0
+    volumes:
+     - ./data/scylla/data:/var/lib/scylla
+    ports:
+     # REST API
+     - "10000:10000"
+     # CQL ports (native_transport_port)
+     - "9042:9042"
+     # Thrift (rpc_port)
+     - "9160:9160"
+     # Internode
+     - "7000:7000"
+     - "7001:7001"
+     # JMX
+     - "7199:7199"
+     # Prometheus monitoring
+     - "9180:9180"
+     - "9100:9100"
   logstash:
     image: logstash
     build:
@@ -41,3 +63,5 @@ services:
       context: ./logstash
     depends_on:
       - elasticsearch
+
+

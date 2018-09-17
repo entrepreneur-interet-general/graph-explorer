@@ -26,4 +26,4 @@ COPY ./load_data.groovy /workspace/janusgraph/scripts/load_data.groovy
 
 COPY ./data data
 
-CMD [ "/bin/bash", "-e", "/workspace/janusgraph/bin/run.sh" ]
+CMD [ "bin/gremlin-server.sh" ]

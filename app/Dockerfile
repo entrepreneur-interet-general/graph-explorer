@@ -1,11 +1,9 @@
-FROM python:3.6.4 
+FROM python:3.6-alpine
 
 RUN mkdir /app
 WORKDIR /app
 
-RUN apt-get update && \
-  curl -sL https://deb.nodesource.com/setup_8.x |  bash -s -- && \
-  apt-get install -y nodejs
+RUN apk add --update nodejs nodejs-npm
 
 COPY ./requirements.txt /app 
 RUN pip install -r requirements.txt 
@@ -24,10 +22,7 @@ RUN npm run build
 COPY ./index.html /app/index.html 
 COPY ./app.py /app/app.py 
 
-COPY ./wait-for-it.sh /app 
-RUN chmod +x /app/wait-for-it.sh
-
 ENV FLASK_APP=app.py
 EXPOSE 5000
 
-CMD [ "./wait-for-it.sh", "janus:8182", "--timeout=120", "--strict", "--", "python", "-m", "flask", "run", "--host=0.0.0.0"]
+CMD ["gunicorn",  "--bind", "0.0.0.0:5000", "--access-logfile", "-", "--error-logfile", "-", "app"]

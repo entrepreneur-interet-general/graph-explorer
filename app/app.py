@@ -11,9 +11,8 @@ from gremlin_python.driver.driver_remote_connection import DriverRemoteConnectio
 from gremlin_python.driver import client 
 
 import time 
-time.sleep(120)
 
-app = Flask(__name__, static_folder="local")
+application = Flask(__name__, static_folder="local")
 
 es_host = 'elasticsearch'
 es = Elasticsearch(es_host, timeout=120, max_retries=10, retry_on_timeout=True)
@@ -30,17 +29,17 @@ g = graph.traversal().withRemote(connection)
 janus_client = client.Client(janus_server_url, 'g')
 
 
-@app.route("/")
+@application.route("/")
 def home():
     return send_file('index.html')
 
 
-@app.route('/dist/<path:path>')
+@application.route('/dist/<path:path>')
 def send_static(path):
     return send_from_directory('dist', path)
 
 
-@app.route('/transactions')
+@application.route('/transactions')
 def get_transactions():
     """ Returns all the transactions of a given entity """
     entity = request.args.get("node")
@@ -96,7 +95,7 @@ def format_properties(vp):
     del vp['prenomnom']
     return vp
 
-@app.route('/neighbors')
+@application.route('/neighbors')
 def get_neighbors():
     """ Returns the subgraph containing `node` and its neighbors 
         :param node: the node in the center of neighbors
@@ -132,7 +131,7 @@ def get_neighbors():
     return jsonify(subgraph)
 
 
-@app.route('/search')
+@application.route('/search')
 def search():
     """ Search for a specific name containing pattern "pattern" in graph "dataset" 
         and returns top 10 suggestions 
@@ -149,3 +148,7 @@ def search():
         matches = [format_properties(vp) for vp in vertices]
 
     return jsonify(matches)
+
+
+if __name__ == "__main__":
+    application.run(host='0.0.0.0')
