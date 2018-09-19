@@ -16,7 +16,6 @@ RUN apt-get update && \
 WORKDIR /workspace/janusgraph
 RUN bin/gremlin-server.sh -i org.apache.tinkerpop gremlin-python 3.2.6
 
-COPY ./run.sh /workspace/janusgraph/bin
 COPY ./gremlin-server.yaml ./conf/gremlin-server/gremlin-server.yaml
 COPY ./janusgraph.properties ./janusgraph.properties
 COPY ./janusgraph.groovy ./scripts/janusgraph.groovy
