@@ -17,12 +17,12 @@ WORKDIR /workspace/janusgraph
 RUN bin/gremlin-server.sh -i org.apache.tinkerpop gremlin-python 3.2.6
 
 COPY ./run.sh /workspace/janusgraph/bin
-COPY ./gremlin-server.yaml /workspace/janusgraph/conf/gremlin-server/gremlin-server.yaml
-COPY ./janusgraph.properties /workspace/janusgraph/janusgraph.properties
-COPY ./janusgraph.groovy /workspace/janusgraph/scripts/janusgraph.groovy
-COPY ./create_schema.groovy /workspace/janusgraph/scripts/create_schema.groovy
-COPY ./load_data.groovy /workspace/janusgraph/scripts/load_data.groovy
-
+COPY ./gremlin-server.yaml ./conf/gremlin-server/gremlin-server.yaml
+COPY ./janusgraph.properties ./janusgraph.properties
+COPY ./janusgraph.groovy ./scripts/janusgraph.groovy
+COPY ./create_schema.groovy ./scripts/create_schema.groovy
+COPY ./load_data.groovy ./scripts/load_data.groovy
+COPY ./clean.groovy ./scripts/clean.groovy
 
 COPY ./data data
 
