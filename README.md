@@ -1,7 +1,9 @@
 # Graph Explorer
 Explore and find suspicious patterns in a large graph of money transactions.
 
-![home](docs/img/home.png)
+<div align="center">
+<img src="docs/img/home.png" alt="architecture">
+</div>
 
 ## Table of Contents
 
@@ -26,7 +28,9 @@ Explore and find suspicious patterns in a large graph of money transactions.
 * d3.js v4 force layout
 
 </br>
+<div align="center">
 <img src="docs/img/architecture.png" alt="architecture" width="400px">
+</div>
 
 
 ## Demo 
