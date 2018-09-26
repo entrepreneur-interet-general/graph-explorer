@@ -14,11 +14,17 @@ import time
 
 application = Flask(__name__, static_folder="local")
 
-es_host = 'elasticsearch'
+# Set special config based on environment 
+if application.config['ENV'] == 'development':
+    application.config.from_object('config.DevelopmentConfig')
+else:
+    application.config.from_object('config.ProductionConfig')
+
+es_host = application.config['ELASTICSEARCH_HOST']
 es = Elasticsearch(es_host, timeout=120, max_retries=10, retry_on_timeout=True)
 index = 'transactions'
 
-janus_host = 'janus'
+janus_host = application.config['JANUS_HOST']
 janus_server_url = 'ws://%s:8182/gremlin' % janus_host
 statics.load_statics(globals())
 graph = Graph()
