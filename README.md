@@ -46,6 +46,10 @@ The different services in the `docker-compose` setup need to be started in a spe
 ```
 > docker-compose build 
 ``` 
+* Create data directories 
+```
+mkdir -p data/elasticsearch data/scylla
+```
 * Start Elasticsearch
 ```
 > docker-compose up -d elasticsearch 
