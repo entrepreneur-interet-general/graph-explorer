@@ -1,9 +1,9 @@
 # Graph Explorer
 Explore and find suspicious patterns in a large graph of money transactions.
 
-![screenshot](https://github.com/entrepreneur-interet-general/graph-explorer/raw/master/docs/img/home.png)
+![home](docs/img/home.png)
 
-## Stack 
+## Architecture 
 
 * JanusGraph 0.2.1 
 * ScyllaDB 2.2.0 (storage backend for JanusGraph)
@@ -11,6 +11,8 @@ Explore and find suspicious patterns in a large graph of money transactions.
 * Python Flask server
 * Vue.js 
 * d3.js v4 force layout
+<img src="docs/img/architecture.png" alt="architecture" width="400px">
+
 
 ## Demo 
 Start exploring the graph from any node (e.g with *Amanda Walker*) 
