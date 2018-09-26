@@ -3,6 +3,19 @@ Explore and find suspicious patterns in a large graph of money transactions.
 
 ![home](docs/img/home.png)
 
+## Table of Contents
+
+* **[Architecture](#architecture)**
+* **[Demo](#demo)**
+* **[Installation](#installation)**
+  * [Prerequisites](#prerequisites)
+  * [Steps](#steps)
+* **[Development](#development)**
+  * [Flask Server](#flask-server)
+  * [Frontend](#frontend)
+* **[Credits](#credits)**
+* **[License](#license)**
+
 ## Architecture 
 
 * JanusGraph 0.2.1 
@@ -11,6 +24,8 @@ Explore and find suspicious patterns in a large graph of money transactions.
 * Python Flask server
 * Vue.js 
 * d3.js v4 force layout
+
+</br>
 <img src="docs/img/architecture.png" alt="architecture" width="400px">
 
 
@@ -19,13 +34,13 @@ Start exploring the graph from any node (e.g with *Amanda Walker*)
 [https://graph-explorer.fr](https://graph-explorer.fr)
 
 
-## Prerequisites 
+## Installation 
+ 
+### Prerequisites 
 
 * Docker CE >= 1.13.0
 * docker-compose >= 1.10.0 
 
-## Installation 
- 
 Below is a step by step guide explaining how to install the app with sample data. 
 If you want to run it with your own data, just replace the following files with your owns:
 * `janus/data/nodes.csv`
@@ -108,11 +123,53 @@ In this case you can run a cleanup script and then restart the `janus` container
 > curl localhost:9200/transactions/doc/_count 
 {"count":2156,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0}}
 ```
-* Start the app in the foreground 
+* Start the Flask server with Gunicorn
 ```
-docker-compose up app 
+docker-compose up -d app 
 ```
 * Visit [http://localhost:5000](http://localhost:5000)
+
+## Development 
+
+### Flask server 
+* Start `Elasticsearch`, `ScyllaDB` and `JanusGraph` with `docker-compose ` as described in the installation steps. 
+* Create a vitualenv for this project with `Python` version 3.6.0 or higher. 
+* Install the dependencies
+```
+pip install -r requirements.txt 
+```
+* Run `Flask` in development mode. This will reload the server on code changes.
+```
+FLASK_APP=app.py FLASK_ENV='development' python -m flask run
+```
+
+### Frontend 
+* Make sure to use a version of `nodejs` higher than 8.0.0. We recomand using [`nvm`](https://github.com/creationix/nvm).
+* Install the dependencies 
+```
+npm install 
+```
+* The project is built using webpack into the file `local/build.js`. 
+* Build the source once with:
+```
+npm run build 
+```
+* Or watch for file changes with:
+```
+npm run watch 
+```
+
+Visit [http://localhost:5000](http://localhost:5000) and start coding ! 
+
+## Credits
+
+<div align="center">
+  <a href="https://entrepreneur-interet-general.etalab.gouv.fr/">
+    <img src="docs/img/logo-eig.png" width="500px">
+  </a>
+</div>
+
+Please visit the [Hopkins mission](https://entrepreneur-interet-general.etalab.gouv.fr/defis/2018/hopkins.html) page for more information
 
 ## License
 
