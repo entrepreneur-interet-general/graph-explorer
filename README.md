@@ -1,5 +1,5 @@
 # Graph Explorer
-Explore and find suspicious patterns in a large graph of money transactions.
+Visualize and explore a large graph of money transactions.
 
 <div align="center">
 <img src="docs/img/home.png" alt="architecture">
