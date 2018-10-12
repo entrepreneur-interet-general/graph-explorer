@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { UPDATE_FILTER, UPDATE_FOCUS_NODE, UPDATE_GRAPH, SHOW_MODAL, HIDE_MODAL, 
-  SHOW_PROGRESS_SPINNER, HIDE_PROGRESS_SPINNER } from './mutation-types';
+import { UPDATE_FILTER, UPDATE_FOCUS_NODE, UPDATE_GRAPH,  
+SHOW_PROGRESS_SPINNER, HIDE_PROGRESS_SPINNER } from './mutation-types';
 import api from './api';
 import * as jsnx from 'jsnetworkx'; 
 
@@ -15,7 +15,6 @@ export default new Vuex.Store({
     },
     focusNodeEntity: null,
     G: new jsnx.MultiDiGraph(),
-    showModal: false,
     showProgressSpinner: false
   },
   getters: {
@@ -48,7 +47,7 @@ export default new Vuex.Store({
       }
       return null;
     },
-    showZoomWidget(state) {
+    showGraphWidgets(state) {
       return state.G.numberOfNodes() > 0 ? true : false;
     }
   },
@@ -63,12 +62,6 @@ export default new Vuex.Store({
     },
     [UPDATE_GRAPH] (state, payload) {
       state.G = payload;
-    },
-    [SHOW_MODAL] (state) {
-      state.showModal = true;
-    },
-    [HIDE_MODAL] (state) {
-      state.showModal = false;
     },
     [SHOW_PROGRESS_SPINNER] (state) {
       state.showProgressSpinner = true;

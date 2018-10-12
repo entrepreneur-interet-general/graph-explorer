@@ -15,21 +15,16 @@
         </span>
       </div>
     </div>
-    <md-button class="md-small table-cell" @click="SHOW_MODAL">DÉTAIL</md-button>
   </div>
   
 </template>
 
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import { SHOW_MODAL } from '../mutation-types'
 
 export default {
   computed: {
     ...mapGetters(["focusNode"])
-  },
-  methods: {
-    ...mapMutations([SHOW_MODAL])
   }
 }
 </script>
