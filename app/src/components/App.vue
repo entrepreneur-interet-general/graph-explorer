@@ -4,7 +4,7 @@
     <!-- <filter-list></filter-list> -->
     <drawer></drawer>
     <graph></graph>
-    <zoom-widget></zoom-widget>
+    <zoom-widget v-if="showZoomWidget"></zoom-widget>
     <modal v-if="showModal">
       <modal-links-detail></modal-links-detail>
     </modal>
@@ -21,7 +21,7 @@ import ZoomWidget from "./ZoomWidget.vue";
 import Modal from "./Modal.vue";
 import ModalLinksDetail from "./ModalLinksDetail.vue";
 import ProgressSpinner from "./ProgressSpinner";
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState, mapGetters } from 'vuex';
 
 
 export default {
@@ -31,7 +31,8 @@ export default {
     filter() {
       return this.$store.state.filter;
     },
-    ...mapState(["showModal", "showProgressSpinner"])
+    ...mapState(["showModal", "showProgressSpinner"]),
+    ...mapGetters(["showZoomWidget"])
   },
   methods: {
     ...mapActions(['expand'])

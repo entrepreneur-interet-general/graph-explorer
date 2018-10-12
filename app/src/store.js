@@ -47,6 +47,9 @@ export default new Vuex.Store({
           .find(n => n.entity == state.focusNodeEntity) 
       }
       return null;
+    },
+    showZoomWidget(state) {
+      return state.G.numberOfNodes() > 0 ? true : false;
     }
   },
   mutations: {
