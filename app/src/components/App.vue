@@ -4,10 +4,8 @@
     <!-- <filter-list></filter-list> -->
     <drawer></drawer>
     <graph></graph>
-    <zoom-widget></zoom-widget>
-    <modal v-if="showModal">
-      <modal-links-detail></modal-links-detail>
-    </modal>
+    <zoom-widget v-if="showGraphWidgets"></zoom-widget>
+    <the-button-download v-if="showGraphWidgets"></the-button-download>
     <progress-spinner v-show="showProgressSpinner"></progress-spinner>
   </div>
 </template>
@@ -18,20 +16,20 @@ import FilterList from "./FilterList.vue";
 import Drawer from "./Drawer.vue";
 import Graph from "./Graph.vue";
 import ZoomWidget from "./ZoomWidget.vue";
-import Modal from "./Modal.vue";
-import ModalLinksDetail from "./ModalLinksDetail.vue";
+import TheButtonDownload from "./TheButtonDownload.vue";
 import ProgressSpinner from "./ProgressSpinner";
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState, mapGetters } from 'vuex';
 
 
 export default {
   name: "app",
-  components: {Search, FilterList, Drawer, Graph, ZoomWidget, Modal, ModalLinksDetail, ProgressSpinner },
+  components: {Search, FilterList, Drawer, Graph, ZoomWidget, TheButtonDownload, ProgressSpinner },
   computed: {
     filter() {
       return this.$store.state.filter;
     },
-    ...mapState(["showModal", "showProgressSpinner"])
+    ...mapState(["showModal", "showProgressSpinner"]),
+    ...mapGetters(["showGraphWidgets"])
   },
   methods: {
     ...mapActions(['expand'])
