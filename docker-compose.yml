@@ -63,5 +63,11 @@ services:
       context: ./logstash
     depends_on:
       - elasticsearch
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:6.0.1 
+  #   depends_on:
+  #     - elasticsearch 
+  #   ports:
+  #     - "5601:5601"
 
 
