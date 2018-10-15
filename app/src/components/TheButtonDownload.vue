@@ -12,21 +12,25 @@
 import { mapGetters } from 'vuex';
 import JSZip from 'JSZip';
 import { json2csv } from '../utils';
+import api from '../api';
 
 export default {
   methods: {
     downloadZip(){
-      var zip = new JSZip()
-      zip.file("nodes.csv", json2csv(this.nodes))
-      zip.file("links.csv", json2csv(this.links))
-      zip.file("transactions.csv", "1,Amanda Walker,2,John Smith")
-      zip.generateAsync({type: 'base64'}).then(b64Data => {
-        var aLink = document.createElement('a');
-        var evt = new MouseEvent('click');    
-        aLink.download = 'data.zip';
-        aLink.href = `data:application/zip;base64,${b64Data}`;
-        //aLink.dispatchEvent(evt);
-      })  
+      var zip = new JSZip();
+      zip.file("noeuds.csv", json2csv(this.nodes));
+      zip.file("liens.csv", json2csv(this.links));
+      const entities = this.nodes.map(node => node.entity);
+      api.transactions({ data: { entities: entities} }, transactions => {
+        zip.file("transactions.csv", json2csv(transactions));
+        zip.generateAsync({type: 'base64'}).then(b64Data => {
+          let aLink = document.createElement('a');
+          let evt = new MouseEvent('click');    
+          aLink.download = 'data.zip';
+          aLink.href = `data:application/zip;base64,${b64Data}`;
+          aLink.dispatchEvent(evt);
+        })  
+      })
     }
   },
   computed: {

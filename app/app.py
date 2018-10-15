@@ -45,17 +45,17 @@ def send_static(path):
     return send_from_directory('dist', path)
 
 
-@application.route('/transactions')
+@application.route('/transactions', methods=["POST"])
 def get_transactions():
     """ Returns all the transactions of a given entity """
-    entity = request.args.get("node")
+    entities = request.get_json()['data']['entities']
     query = {
         'size': 200,
         'query': {
             'bool': {
-                'should': [
-                    { 'term': { 'ben_entity_id': entity } },
-                    { 'term': { 'don_entity_id': entity } }
+                'must': [
+                    { 'terms': { 'ben_entity_id': entities } },
+                    { 'terms': { 'don_entity_id': entities } }
                 ]
             }
         }
@@ -84,13 +84,13 @@ def get_transactions():
         'ben_pays_code',
         'ben_code_postal',
     ]
+
     rows = []
     for transaction in transactions:
-        row = [transaction.get(column) for column in columns]
+        row = { k: v for (k, v) in transaction.items() if k in columns }
         rows.append(row)
 
-    response = {'columns': columns, 'rows': rows}
-    return jsonify(response)
+    return jsonify(rows)
 
 def format_properties(vp):
     for k in vp.keys():

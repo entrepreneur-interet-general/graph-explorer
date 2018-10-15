@@ -5,7 +5,7 @@
     <drawer></drawer>
     <graph></graph>
     <zoom-widget v-if="showGraphWidgets"></zoom-widget>
-    <the-button-download></the-button-download>
+    <the-button-download v-if="showGraphWidgets"></the-button-download>
     <progress-spinner v-show="showProgressSpinner"></progress-spinner>
   </div>
 </template>
