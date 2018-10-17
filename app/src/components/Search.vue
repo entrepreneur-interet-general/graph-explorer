@@ -7,7 +7,7 @@
       @md-changed="handleChange" 
       autofocus 
       @md-selected="handleSelected" 
-      v-bind:class="{ 'search-visible': isVisible, 'search-hidden': !isVisible }"> 
+      v-bind:class="{'search-hidden': !isVisible}"> 
       <label>Rechercher</label>
       <md-icon id="ic-search">search</md-icon>
       <template slot="md-autocomplete-item" slot-scope="{ item, term }">
@@ -58,7 +58,7 @@ export default {
       if (this.value != "") {
         this.search(this.value);
       }
-    },
+    },  
     ...mapActions(['expand', 'search']),
     ...mapMutations([UPDATE_SEARCH_RESULTS, SHOW_DRAWER_SEARCH_RESULTS])
   },
@@ -162,12 +162,9 @@ export default {
 }
 
 .search-hidden {
-  opacity: 0;
+  display: none
 }
 
-.search-visible {
-  opacity: 1;
-}
 
 
 </style>
