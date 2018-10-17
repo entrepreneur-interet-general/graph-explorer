@@ -65,6 +65,7 @@ def get_transactions():
     columns = [
         'date_operation',
         'valeur_euro',
+        'don_id',
         'don_entity_id',
         'don_prenom',
         'don_nom',
@@ -74,6 +75,7 @@ def get_transactions():
         'don_pays',
         'don_pays_code',
         'don_code_postal',
+        'ben_id',
         'ben_entity_id',
         'ben_prenom',
         'ben_nom',
