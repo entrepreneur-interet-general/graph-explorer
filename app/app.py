@@ -147,7 +147,10 @@ def search():
     search_term = request.args.get("search_term")
     matches = []
     if search_term:
-        query = "g.V().has('prenomnom', textContainsFuzzy('%s')).limit(10).valueMap()" % search_term
+        query = "g.V().has('prenomnom', textContainsFuzzy('%s'))\
+            .property('degree', __.both().dedup().count())\
+            .order().by('degree', decr)\
+            .limit(10).valueMap()" % search_term
         vertices = janus_client.submit(query).all().result() 
         # vertices properties are array like {"entity": [12568]},
         # format them to {"entity": 12568}

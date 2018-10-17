@@ -71,6 +71,7 @@ export default new Vuex.Store({
     },
     [UPDATE_FOCUS_NODE] (state, payload) {
       state.focusNodeEntity = payload;
+      state.showDrawerSearchResults = false;
     },
     [UPDATE_GRAPH] (state, payload) {
       state.G = payload;

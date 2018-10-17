@@ -11,7 +11,8 @@
         :code_postal="searchResult.code_postal"
         :pays_code="searchResult.pays_code"
         :numero_piece_identite="searchResult.numero_piece_identite"
-        :star="searchResult.star">
+        :star="searchResult.star"
+        :degree="searchResult.degree">
       </drawer-search-results-list-item>
     </div>
   </div>

@@ -7,6 +7,8 @@
       </div>
       <div>Code postal: {{code_postal}} {{pays_code}}</div>
       <div>ID n° {{numero_piece_identite}}</div>
+      <div v-if="degree > 1">{{degree}} liens</div>
+      <div v-else>{{degree}} lien</div>
     </div>
   </div>
 </template>
@@ -14,17 +16,14 @@
 <script>
 
 import { mapActions, mapMutations } from 'vuex';
-import { HIDE_DRAWER_SEARCH_RESULTS } from '../mutation-types.js'
 
 export default {
-  props: ['prenom', 'nom', 'entity', 'code_postal', 'pays_code', 'numero_piece_identite', 'star'],
+  props: ['prenom', 'nom', 'entity', 'code_postal', 'pays_code', 'numero_piece_identite', 'star', 'degree'],
   methods: {
     handleClick(){
       this.expand(this.entity);
-      this.HIDE_DRAWER_SEARCH_RESULTS()
     },
-    ...mapActions(['expand']),
-    ...mapMutations([HIDE_DRAWER_SEARCH_RESULTS])
+    ...mapActions(['expand'])
   }
 }
 </script>
