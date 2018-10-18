@@ -19,7 +19,24 @@ export default {
   methods: {
     downloadZip(){
       var zip = new JSZip();
-      zip.file("noeuds.csv", json2csv(this.nodes));
+      const nodeKeys = [
+        'entity', 
+        'prenom', 
+        'nom', 
+        'date_naissance', 
+        'degree', 
+        'code_postal', 
+        'pays_code', 
+        'numero_piece_identite', 
+        'star'];
+      const nodes = this.nodes.map(node => {
+        let n = {};
+        nodeKeys.forEach(k => {
+          n[k] = node[k];
+        });     
+        return n;   
+      })
+      zip.file("noeuds.csv", json2csv(nodes));
       zip.file("liens.csv", json2csv(this.links));
       zip.file("README.txt", readme);
       const entities = this.nodes.map(node => node.entity);
