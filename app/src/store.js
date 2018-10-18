@@ -96,13 +96,6 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    search({ commit, state }, searchTerm){
-      const options = { params: { search_term: searchTerm } }
-      api.search(options).then(response => {
-        commit(UPDATE_SEARCH_RESULTS, response)
-        commit(SHOW_DRAWER_SEARCH_RESULTS)
-      }) 
-    },
     expand({ commit, state }, entity) {
       let G = state.G.copy();
       if (G.hasNode(entity)) {

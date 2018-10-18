@@ -54,12 +54,25 @@ export default {
       this.expand(person.entity);
     },
     handleSubmit(){
+      const vm = this;
+      // clear previous searches 
+      vm.UPDATE_SEARCH_RESULTS([]);
+      // remove focus from the search bar
       document.activeElement.blur();
-      if (this.value != "") {
-        this.search(this.value);
+      if (vm.value != "") {
+        const options = { params: { search_term: vm.value } }
+        api.search(options).then(results => {
+          if (results.length == 1) {
+            const entity = results[0].entity;
+            vm.expand(entity);
+          } else if (results.length > 1) {
+            vm.UPDATE_SEARCH_RESULTS(results);
+            vm.SHOW_DRAWER_SEARCH_RESULTS();
+          }
+        })
       }
     },  
-    ...mapActions(['expand', 'search']),
+    ...mapActions(['expand']),
     ...mapMutations([UPDATE_SEARCH_RESULTS, SHOW_DRAWER_SEARCH_RESULTS])
   },
   mounted() {
