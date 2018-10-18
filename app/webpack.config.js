@@ -59,7 +59,7 @@ module.exports = {
         test: /\.worker\.js$/,
         loader: 'worker-loader', 
         options: {
-          name: './static/graph-explorer-0.3/worker.js' 
+          name: './static/graph-explorer/worker.js' 
         }
       },
       {
@@ -71,8 +71,12 @@ module.exports = {
         test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
         loader: 'file-loader',
         options: {
-          name: './static/graph-explorer-0.3/[name].[ext]?[hash]'
+          name: './static/graph-explorer/[name].[ext]?[hash]'
         }
+      },
+      {
+        test: /\.txt$/,
+        use: 'raw-loader'
       }
     ]
   },
