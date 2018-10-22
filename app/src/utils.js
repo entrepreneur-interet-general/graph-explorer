@@ -102,10 +102,10 @@ export function json2csv(items){
   let csv = items.map(row => {
       return header.map(fieldName =>{
         return JSON.stringify(row[fieldName], replacer)
-      }).join(',')
+      }).join(';')
     } 
   )
-  csv.unshift(header.join(','));
+  csv.unshift(header.map(h => JSON.stringify(h)).join(';'));
   csv = csv.join('\r\n');
   return csv;
 }
