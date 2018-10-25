@@ -18,13 +18,13 @@ Visualize and explore a large graph of money transactions.
 * **[Credits](#credits)**
 * **[License](#license)**
 
-## Architecture 
+## Architecture
 
-* JanusGraph 0.2.1 
+* JanusGraph 0.2.1
 * ScyllaDB 2.2.0 (storage backend for JanusGraph)
 * Elasticsearch 6.0.1 (index backend for JanusGraph)
 * Python Flask server
-* Vue.js 
+* Vue.js
 * d3.js v4 force layout
 
 </br>
@@ -33,25 +33,25 @@ Visualize and explore a large graph of money transactions.
 </div>
 
 
-## Demo 
-Start exploring the graph from any node (e.g with *Amanda Walker*) 
+## Demo
+Start exploring the graph from any node (e.g. with *Amanda Walker*)
 [https://graph-explorer.fr](https://graph-explorer.fr)
 
 
-## Installation 
- 
-### Prerequisites 
+## Installation
+
+### Prerequisites
 
 * Docker CE >= 1.13.0
-* docker-compose >= 1.10.0 
+* docker-compose >= 1.10.0
 
-Below is a step by step guide explaining how to install the app with sample data. 
+Below is a step by step guide explaining how to install the app with sample data.
 If you want to run it with your own data, just replace the following files with your owns:
 * `janus/data/nodes.csv`
-* `janus/data/links.csv` 
+* `janus/data/links.csv`
 *  `logstash/data/transactions.csv`
 
-Data directories for Elasticsearch and ScyllaDB will be mounted in the `PROJECT_HOME/data`
+Data directories for Elasticsearch and ScyllaDB will be mounted in the `PROJECT_HOME/data`.
 
 The different services in the `docker-compose` setup need to be started in a specific order. [`wait-for-it.sh`](https://github.com/vishnubob/wait-for-it) mechanisms (or alike) could be implemented in the future to allow running all the services in a one line command like `docker-compose --build up`.
 
@@ -60,39 +60,39 @@ The different services in the `docker-compose` setup need to be started in a spe
 ```
 > git clone  git@github.com:entrepreneur-interet-general/graph-explorer.git
 > cd graph-explorer
-``` 
+```
 * Download and build Docker images
 ```
-> docker-compose build 
-``` 
-* Create data directories 
+> docker-compose build
+```
+* Create data directories
 ```
 mkdir -p data/elasticsearch data/scylla
 ```
 * Start Elasticsearch
 ```
-> docker-compose up -d elasticsearch 
-``` 
-* Wait for Elasticsearch to be available on port `9200` 
+> docker-compose up -d elasticsearch
 ```
-> curl localhost:9200/_cat/health 
+* Wait for Elasticsearch to be available on port `9200`
+```
+> curl localhost:9200/_cat/health
 docker-cluster yellow 1 1 6 6 0 0 6 0 - 50.0%
-``` 
+```
 * Start ScyllaDB
 ```
 > docker-compose up -d scylladb
-``` 
+```
 * Wait for ScyllaDB to be available
 ```
 > docker-compose exec scylladb nodetool status
 --  Address     Load       Tokens       Owns    Host ID                               Rack
 UN  172.22.0.3  1.07 MB    256          ?       c961595a-ee52-4f94-baf3-74cdc5058af6  rack1
-``` 
-* Start JanusGraph 
 ```
-> docker-compose up -d janus 
-``` 
-If a previous janus container has not been shut down correctly, you might get the following error: 
+* Start JanusGraph
+```
+> docker-compose up -d janus
+```
+If a previous janus container has not been shut down correctly, you might get the following error:
 ```
 A JanusGraph graph with the same instance id [*] is already open. Might required forced shutdown.
 ```
@@ -102,68 +102,68 @@ In this case you can run a cleanup script and then restart the `janus` container
 ```
 *  Wait for JanusGraph to be available on port `8182`
 ```
-> curl -XPOST -d '{"gremlin" : "1+1" }' localhost:8182 
+> curl -XPOST -d '{"gremlin" : "1+1" }' localhost:8182
 {"result":{"data":[2],"meta":{}}}
 ```
-* Create the graph schema and load nodes and edges into JanusGraph (do it only the first time or after deleting the data directory)  
+* Create the graph schema and load nodes and edges into JanusGraph (do it only the first time or after deleting the data directory)
 ```
 > docker-compose exec janus bin/gremlin.sh -e scripts/create_schema.groovy
-> docker-compose exec janus bin/gremlin.sh -e scripts/load_data.groovy 
+> docker-compose exec janus bin/gremlin.sh -e scripts/load_data.groovy
 ```
 * Checks that nodes and edges have been loaded
 ```
-> curl -XPOST -d '{"gremlin" : "g.V().count()" }' localhost:8182 
+> curl -XPOST -d '{"gremlin" : "g.V().count()" }' localhost:8182
 {"result":{"data":[1606],"meta":{}}}
 
 > curl -XPOST -d '{"gremlin" : "g.E().count()" }' localhost:8182
 {"result":{"data":[2156],"meta":{}}}
 ```
-* Load raw transactions into Elasticsearch (do it only the first time or after deleting the data directoy) 
+* Load raw transactions into Elasticsearch (do it only the first time or after deleting the data directoy)
 ```
-> docker-compose up -d logstash 
+> docker-compose up -d logstash
 ```
 * Check that transactions have been loaded in the `transactions` index
 ```
-> curl localhost:9200/transactions/doc/_count 
+> curl localhost:9200/transactions/doc/_count
 {"count":2156,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0}}
 ```
 * Start the Flask server with Gunicorn
 ```
-docker-compose up -d app 
+docker-compose up -d app
 ```
 * Visit [http://localhost:5000](http://localhost:5000)
 
-## Development 
+## Development
 
-### Flask server 
-* Start `Elasticsearch`, `ScyllaDB` and `JanusGraph` with `docker-compose ` as described in the installation steps. 
-* Create a vitualenv for this project with `Python` version 3.6.0 or higher. 
+### Flask server
+* Start `Elasticsearch`, `ScyllaDB` and `JanusGraph` with `docker-compose ` as described in the installation steps.
+* Create a vitualenv for this project with `Python` version 3.6.0 or higher.
 * Install the dependencies
 ```
-pip install -r requirements.txt 
+pip install -r requirements.txt
 ```
 * Run `Flask` in development mode. This will reload the server on code changes.
 ```
 FLASK_APP=app.py FLASK_ENV='development' python -m flask run
 ```
 
-### Frontend 
+### Frontend
 * Make sure to use a version of `nodejs` higher than 8.0.0. We recomand using [`nvm`](https://github.com/creationix/nvm).
-* Install the dependencies 
+* Install the dependencies
 ```
-npm install 
+npm install
 ```
-* The project is built using webpack into the file `local/build.js`. 
+* The project is built using webpack into the file `local/build.js`.
 * Build the source once with:
 ```
-npm run build 
+npm run build
 ```
 * Or watch for file changes with:
 ```
-npm run watch 
+npm run watch
 ```
 
-Visit [http://localhost:5000](http://localhost:5000) and start coding ! 
+Visit [http://localhost:5000](http://localhost:5000) and start coding!
 
 ## Credits
 
@@ -173,7 +173,7 @@ Visit [http://localhost:5000](http://localhost:5000) and start coding !
   </a>
 </div>
 
-Please visit the [Hopkins mission](https://entrepreneur-interet-general.etalab.gouv.fr/defis/2018/hopkins.html) page for more information
+Please visit the [Hopkins mission](https://entrepreneur-interet-general.etalab.gouv.fr/defis/2018/hopkins.html) page for more information.
 
 ## License
 
