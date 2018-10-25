@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { UPDATE_FILTER, UPDATE_FOCUS_NODE, UPDATE_GRAPH, SHOW_MODAL, HIDE_MODAL, 
-  SHOW_PROGRESS_SPINNER, HIDE_PROGRESS_SPINNER } from './mutation-types';
+import { UPDATE_FILTER, UPDATE_FOCUS_NODE, UPDATE_GRAPH,  
+SHOW_PROGRESS_SPINNER, HIDE_PROGRESS_SPINNER, SHOW_DRAWER_SEARCH_RESULTS, 
+HIDE_DRAWER_SEARCH_RESULTS, UPDATE_SEARCH_RESULTS } from './mutation-types';
 import api from './api';
 import * as jsnx from 'jsnetworkx'; 
 
@@ -14,9 +15,10 @@ export default new Vuex.Store({
       departement: null
     },
     focusNodeEntity: null,
+    searchResults: [],
     G: new jsnx.MultiDiGraph(),
-    showModal: false,
-    showProgressSpinner: false
+    showProgressSpinner: false,
+    showDrawerSearchResults: false
   },
   getters: {
     nodes(state) {
@@ -47,6 +49,18 @@ export default new Vuex.Store({
           .find(n => n.entity == state.focusNodeEntity) 
       }
       return null;
+    },
+    showGraphWidgets(state) {
+      return state.G.numberOfNodes() > 0 ? true : false;
+    },
+    showDrawer(state, getters) {
+      return getters.showDrawerNodeInfo || state.showDrawerSearchResults;
+    },
+    showDrawerNodeInfo(state) {
+      return state.focusNodeEntity ? true : false;
+    },
+    showBackToResults(state){
+      return !state.showDrawerSearchResults && state.searchResults.length > 0
     }
   },
   mutations: {
@@ -57,21 +71,28 @@ export default new Vuex.Store({
     },
     [UPDATE_FOCUS_NODE] (state, payload) {
       state.focusNodeEntity = payload;
+      state.showDrawerSearchResults = false;
     },
     [UPDATE_GRAPH] (state, payload) {
       state.G = payload;
-    },
-    [SHOW_MODAL] (state) {
-      state.showModal = true;
-    },
-    [HIDE_MODAL] (state) {
-      state.showModal = false;
     },
     [SHOW_PROGRESS_SPINNER] (state) {
       state.showProgressSpinner = true;
     },
     [HIDE_PROGRESS_SPINNER] (state) {
       state.showProgressSpinner = false;
+    },
+    [SHOW_DRAWER_SEARCH_RESULTS] (state) {
+      state.showDrawerSearchResults = true;
+    },
+    [HIDE_DRAWER_SEARCH_RESULTS] (state) {
+      state.showDrawerSearchResults = false;
+    },
+    [UPDATE_SEARCH_RESULTS] (state, payload) {
+      if (payload.constructor === Array && payload.length == 0) {
+        state.showDrawerSearchResults = false;
+      }
+      state.searchResults = payload;
     }
   },
   actions: {

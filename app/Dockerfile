@@ -21,6 +21,7 @@ RUN npm run build
 
 COPY ./index.html /app/index.html 
 COPY ./app.py /app/app.py 
+COPY ./config.py /app/config.py 
 
 ENV FLASK_APP=app.py
 EXPOSE 5000

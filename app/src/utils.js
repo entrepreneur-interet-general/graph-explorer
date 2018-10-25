@@ -92,3 +92,20 @@ function defer () {
   })
   return deferred
 }
+
+export function json2csv(items){
+  if (items.length === 0 ) {
+    return '';
+  }
+  const replacer = (key, value) => value === null ? '' : value;
+  const header = Object.keys(items[0]);
+  let csv = items.map(row => {
+      return header.map(fieldName =>{
+        return JSON.stringify(row[fieldName], replacer)
+      }).join(';')
+    } 
+  )
+  csv.unshift(header.map(h => JSON.stringify(h)).join(';'));
+  csv = csv.join('\r\n');
+  return csv;
+}

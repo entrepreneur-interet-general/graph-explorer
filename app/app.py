@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
+from collections import OrderedDict 
 
 from flask import Flask, request, send_from_directory, jsonify, send_file
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch 
 from gremlin_python import statics 
 from gremlin_python.structure.graph import Graph 
 from gremlin_python.process.graph_traversal import __ 
@@ -10,7 +11,6 @@ from gremlin_python.process.strategies import *
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection 
 from gremlin_python.driver import client 
 
-import time 
 
 application = Flask(__name__, static_folder="local")
 
@@ -45,17 +45,17 @@ def send_static(path):
     return send_from_directory('dist', path)
 
 
-@application.route('/transactions')
+@application.route('/transactions', methods=["POST"])
 def get_transactions():
     """ Returns all the transactions of a given entity """
-    entity = request.args.get("node")
+    entities = request.get_json()['data']['entities']
     query = {
         'size': 200,
         'query': {
             'bool': {
-                'should': [
-                    { 'term': { 'ben_entity_id': entity } },
-                    { 'term': { 'don_entity_id': entity } }
+                'must': [
+                    { 'terms': { 'ben_entity_id': entities } },
+                    { 'terms': { 'don_entity_id': entities } }
                 ]
             }
         }
@@ -65,6 +65,7 @@ def get_transactions():
     columns = [
         'date_operation',
         'valeur_euro',
+        'don_id',
         'don_entity_id',
         'don_prenom',
         'don_nom',
@@ -74,6 +75,7 @@ def get_transactions():
         'don_pays',
         'don_pays_code',
         'don_code_postal',
+        'ben_id',
         'ben_entity_id',
         'ben_prenom',
         'ben_nom',
@@ -84,13 +86,15 @@ def get_transactions():
         'ben_pays_code',
         'ben_code_postal',
     ]
+
     rows = []
     for transaction in transactions:
-        row = [transaction.get(column) for column in columns]
+        row = OrderedDict()
+        for column in columns:
+            row[column] = transaction[column]
         rows.append(row)
 
-    response = {'columns': columns, 'rows': rows}
-    return jsonify(response)
+    return json.dumps(rows)
 
 def format_properties(vp):
     for k in vp.keys():
@@ -147,7 +151,10 @@ def search():
     search_term = request.args.get("search_term")
     matches = []
     if search_term:
-        query = "g.V().has('prenomnom', textContainsFuzzy('%s')).limit(10).valueMap()" % search_term
+        query = "g.V().has('prenomnom', textContainsFuzzy('%s'))\
+            .property('degree', __.both().dedup().count())\
+            .order().by('degree', decr)\
+            .limit(10).valueMap()" % search_term
         vertices = janus_client.submit(query).all().result() 
         # vertices properties are array like {"entity": [12568]},
         # format them to {"entity": 12568}

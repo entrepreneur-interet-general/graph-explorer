@@ -1,5 +1,5 @@
 # Graph Explorer
-Explore and find suspicious patterns in a large graph of money transactions.
+Visualize and explore a large graph of money transactions.
 
 <div align="center">
 <img src="docs/img/home.png" alt="architecture">
@@ -179,7 +179,7 @@ Please visit the [Hopkins mission](https://entrepreneur-interet-general.etalab.g
 
 MIT License
 
-Copyright (c) 2018  Ministère de l'Action et des Comptes Publics, Benoît Guigal
+Copyright (c) 2018 Ministère de l'Action et des Comptes Publics, Benoît Guigal, Paul Boosz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -18,7 +18,7 @@ export default {
     })
   },
   transactions(options, callback){
-    axios.get(transactionsUrl, options).then(response => {
+    axios.post(transactionsUrl, options).then(response => {
       callback(response.data);
     })
   } 

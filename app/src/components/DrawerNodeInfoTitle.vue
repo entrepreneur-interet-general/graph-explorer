@@ -22,7 +22,7 @@ export default {
 @import "../scss/settings.scss";
 
 #drawer-title {
-  margin-top: 87px;
+  margin-top: 110px;
   background-color: $peter-river;
   color: white;
   min-width: 0;

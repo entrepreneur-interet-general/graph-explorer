@@ -1,23 +1,16 @@
 <template>
-    <div id="drawer" v-bind:style="drawerStyle" v-if="focusNodeEntity">
+    <div id="drawer" v-bind:style="drawerStyle">
       <drawer-toggle-button @click="toggleDrawer" v-bind:expanded="drawerExpanded"></drawer-toggle-button>
-      <drawer-title></drawer-title>
-      <drawer-controls></drawer-controls> 
-      <drawer-node-properties></drawer-node-properties>
-      <drawer-links-detail></drawer-links-detail>
+      <slot></slot>
     </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import DrawerToggleButton from './DrawerToggleButton.vue';
-import DrawerTitle from './DrawerTitle.vue';
-import DrawerControls from './DrawerControls.vue';
-import DrawerNodeProperties from './DrawerNodeProperties.vue';
-import DrawerLinksDetail from './DrawerLinksDetail.vue';
 
 export default {
-  components: { DrawerToggleButton, DrawerTitle, DrawerControls, DrawerNodeProperties, DrawerLinksDetail },
+  components: { DrawerToggleButton },
   data() {
     return {
       drawerExpanded: true
