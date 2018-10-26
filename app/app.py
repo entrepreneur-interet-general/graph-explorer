@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
 import json
-from collections import OrderedDict 
+from collections import OrderedDict
 
 from flask import Flask, request, send_from_directory, jsonify, send_file
-from elasticsearch import Elasticsearch 
-from gremlin_python import statics 
-from gremlin_python.structure.graph import Graph 
-from gremlin_python.process.graph_traversal import __ 
-from gremlin_python.process.strategies import * 
-from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection 
-from gremlin_python.driver import client 
+from elasticsearch import Elasticsearch
+from gremlin_python.driver import client
 
 
 application = Flask(__name__, static_folder="local")
 
-# Set special config based on environment 
+# Set special config based on environment
 if application.config['ENV'] == 'development':
     application.config.from_object('config.DevelopmentConfig')
 else:
@@ -26,14 +21,11 @@ index = 'transactions'
 
 janus_host = application.config['JANUS_HOST']
 janus_server_url = 'ws://%s:8182/gremlin' % janus_host
-statics.load_statics(globals())
-graph = Graph()
-connection = DriverRemoteConnection(janus_server_url, 'g')
-g = graph.traversal().withRemote(connection)
 
-# # Create a low level client for Janus graph specific queries 
-janus_client = client.Client(janus_server_url, 'g')
 
+def get_janus_client():
+    """ Returns a JanusGraph client """
+    return client.Client(janus_server_url, 'g')
 
 @application.route("/")
 def home():
@@ -107,12 +99,13 @@ def format_properties(vp):
 
 @application.route('/neighbors')
 def get_neighbors():
-    """ Returns the subgraph containing `node` and its neighbors 
+    """ Returns the subgraph containing `node` and its neighbors
         :param node: the node in the center of neighbors
         :returns: the subgraph of node and its neighbors
     """
     entity = request.args.get("node")
     if entity:
+        janus_client = get_janus_client()
         # Get all neighbors nodes
         query = "g.V().has('entity', '%s')\
             .bothE()\
@@ -124,7 +117,7 @@ def get_neighbors():
             .valueMap()" % entity
         nodes = janus_client.submit(query).next()
         nodes = [format_properties(n) for n in nodes]
-        # Get all links between the nodes and its neighbors 
+        # Get all links between the nodes and its neighbors
         query = "g.V().has('entity', %s)\
             .bothE()\
             .as('source', 'target', 'date_operation', 'valeur_euro')\
@@ -143,22 +136,27 @@ def get_neighbors():
 
 @application.route('/search')
 def search():
-    """ Search for a specific name containing pattern "pattern" in graph "dataset" 
-        and returns top 10 suggestions 
-        :param search_term: The pattern we are searching 
-        :param filters: A list of filters 
+    """ Search for a specific name containing pattern "pattern" in graph "dataset"
+        and returns top 10 suggestions
+        :param search_term: The pattern we are searching
+        :param filters: A list of filters
     """
-    search_term = request.args.get("search_term")
+    search_term = request.args.get("search_term").strip()
     matches = []
     if search_term:
-        query = "g.V().has('prenomnom', textContainsFuzzy('%s'))\
-            .property('degree', __.both().dedup().count())\
-            .order().by('degree', decr)\
-            .limit(10).valueMap()" % search_term
-        vertices = janus_client.submit(query).all().result() 
-        # vertices properties are array like {"entity": [12568]},
-        # format them to {"entity": 12568}
-        matches = [format_properties(vp) for vp in vertices]
+        janus_client = get_janus_client()
+        lucene_query = " ".join(["%s~" % t for t in search_term.split()])
+        query = "graph.indexQuery('vertexByPrenomNom', 'v.prenomnom:%s')\
+            .limit(10).vertices()" % lucene_query
+        vertices = janus_client.submit(query).all().result()
+        elements = [v["element"].id for v in vertices]
+        if elements:
+            query = "g.V(%s).property('degree', __.both().dedup().count())\
+                .valueMap()" % elements
+            properties = janus_client.submit(query).all().result()
+            # vertices properties are array like {"entity": [12568]},
+            # format them to {"entity": 12568}
+            matches = [format_properties(p) for p in properties]
 
     return jsonify(matches)
 
