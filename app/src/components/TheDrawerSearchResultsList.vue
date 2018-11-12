@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div id="header"></div>
+    <div id="header"/>
     <div id="search-results-list">
-      <drawer-search-results-list-item 
-        v-for="searchResult in searchResults" 
+      <the-drawer-search-results-list-item
+        v-for="searchResult in searchResults"
         :key="searchResult.entity"
         :prenom="searchResult.prenom"
         :nom="searchResult.nom"
@@ -12,30 +12,29 @@
         :pays_code="searchResult.pays_code"
         :numero_piece_identite="searchResult.numero_piece_identite"
         :star="searchResult.star"
-        :degree="searchResult.degree">
-      </drawer-search-results-list-item>
+        :degree="searchResult.degree"/>
     </div>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import DrawerSearchResultsListItem from './DrawerSearchResultsListItem';
+import TheDrawerSearchResultsListItem from './TheDrawerSearchResultsListItem.vue';
 
 export default {
-  components: { DrawerSearchResultsListItem },
+  components: { TheDrawerSearchResultsListItem },
   computed: {
-    ...mapState(["searchResults"]),
-    ...mapGetters(["showSearchResultsDisplayButton"])
+    ...mapState(['searchResults']),
+    ...mapGetters(['showSearchResultsDisplayButton'])
   }
-}
+};
 </script>
 
 <style lang="scss">
 @import "../scss/settings.scss";
 
-#header { 
-  height: 80px; 
+#header {
+  height: 80px;
   background-color: white;
   z-index: 15;
 }

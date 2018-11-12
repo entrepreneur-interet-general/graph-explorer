@@ -23,9 +23,19 @@ janus_host = application.config['JANUS_HOST']
 janus_server_url = 'ws://%s:8182/gremlin' % janus_host
 
 
-def get_janus_client():
-    """ Returns a JanusGraph client """
-    return client.Client(janus_server_url, 'g')
+class JanusClient():
+    """
+    Context manager to get a JanusGraph client
+    and ensure it is closed after usage
+    """
+
+    def __enter__(self):
+        self.client = client.Client(janus_server_url, 'g')
+        return self.client
+
+    def __exit__(self, *args):
+        self.client.close()
+
 
 @application.route("/")
 def home():
@@ -88,7 +98,13 @@ def get_transactions():
 
     return json.dumps(rows)
 
+
 def format_properties(vp):
+    """
+    Format properties from the output of a valueMap() step
+    http://tinkerpop.apache.org/docs/3.3.4/reference/#valuemap-step
+    {"entity": [12568]} => {"entity": 12568}
+    """
     for k in vp.keys():
         p = vp[k]
         if len(p) >= 1:
@@ -97,6 +113,7 @@ def format_properties(vp):
     del vp['prenomnom']
     return vp
 
+
 @application.route('/neighbors')
 def get_neighbors():
     """ Returns the subgraph containing `node` and its neighbors
@@ -104,8 +121,7 @@ def get_neighbors():
         :returns: the subgraph of node and its neighbors
     """
     entity = request.args.get("node")
-    if entity:
-        janus_client = get_janus_client()
+    with JanusClient() as janus_client:
         # Get all neighbors nodes
         query = "g.V().has('entity', '%s')\
             .bothE()\
@@ -139,24 +155,23 @@ def search():
     """ Search for a specific name containing pattern "pattern" in graph "dataset"
         and returns top 10 suggestions
         :param search_term: The pattern we are searching
-        :param filters: A list of filters
+        :returns: the search suggestions
     """
     search_term = request.args.get("search_term").strip()
     matches = []
     if search_term:
-        janus_client = get_janus_client()
-        lucene_query = " ".join(["%s~" % t for t in search_term.split()])
-        query = "graph.indexQuery('vertexByPrenomNom', 'v.prenomnom:%s')\
-            .limit(10).vertices()" % lucene_query
-        vertices = janus_client.submit(query).all().result()
-        elements = [v["element"].id for v in vertices]
-        if elements:
-            query = "g.V(%s).property('degree', __.both().dedup().count())\
-                .valueMap()" % elements
-            properties = janus_client.submit(query).all().result()
-            # vertices properties are array like {"entity": [12568]},
-            # format them to {"entity": 12568}
-            matches = [format_properties(p) for p in properties]
+        with JanusClient() as janus_client:
+            lucene_query = " ".join(["%s~" % t for t in search_term.split()])
+            query = "graph.indexQuery('vertexByPrenomNom', 'v.prenomnom:%s')\
+                .limit(10).vertices()" % lucene_query
+            vertices = janus_client.submit(query).all().result()
+            elements = [v["element"].id for v in vertices]
+            if elements:
+                query = "g.V(%s).property('degree', __.both().dedup().count())\
+                    .valueMap()" % elements
+                properties = janus_client.submit(query).all().result()
+                matches = [format_properties(p) for p in properties]
+
 
     return jsonify(matches)
 

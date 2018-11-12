@@ -1,0 +1,9 @@
+{
+    "extends": [
+        "airbnb-base",
+        "plugin:vue/recommended"
+    ],
+    "rules": {
+        "comma-dangle": ["error", "never"]
+    }
+}
