@@ -59,11 +59,11 @@ export default {
     });
   },
   methods: {
-    handleChange(searchTerm) {
-      if (searchTerm === '') {
+    handleChange(text) {
+      if (text === '') {
         this.UPDATE_SEARCH_RESULTS([]);
       }
-      const options = { params: { search_term: searchTerm } };
+      const options = { params: { text } };
       this.people = debouncedSearch(options);
     },
     handleSelected(person) {
