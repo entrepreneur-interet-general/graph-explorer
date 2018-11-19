@@ -9,6 +9,9 @@
     <the-modal v-if="showModal">
       <the-transactions-table/>
     </the-modal>
+    <the-navigation
+      :app-name="config.appName"
+      :help-url="config.helpUrl"/>
   </div>
 </template>
 
@@ -22,6 +25,7 @@ import TheButtonDownload from './TheButtonDownload.vue';
 import TheProgressSpinner from './TheProgressSpinner.vue';
 import TheModal from './TheModal.vue';
 import TheTransactionsTable from './TheTransactionsTable.vue';
+import TheNavigation from './TheNavigation.vue';
 
 export default {
   name: 'App',
@@ -33,13 +37,19 @@ export default {
     TheButtonDownload,
     TheProgressSpinner,
     TheModal,
-    TheTransactionsTable
+    TheTransactionsTable,
+    TheNavigation
+  },
+  data() {
+    const configElement = document.getElementById('config');
+    const config = JSON.parse(configElement.innerHTML);
+    return { config };
   },
   computed: {
     filter() {
       return this.$store.state.filter;
     },
-    ...mapState(['showModal', 'showProgressSpinner', 'showDrawerSearchResults']),
+    ...mapState(['showModal', 'showProgressSpinner', 'showDrawerSearchResults', 'showNavigation']),
     ...mapGetters(['showGraphWidgets', 'showDrawer'])
   },
   methods: {
@@ -65,5 +75,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   height: 100%;
+}
+
+#toto {
+  position: absolute;
+  left: 400px;
+  top: 100px;
+  z-index: 10;
+  background-color: black;
 }
 </style>

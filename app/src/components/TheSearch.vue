@@ -12,8 +12,15 @@
       autofocus
       @md-changed="handleChange"
       @md-selected="handleSelected">
+      <div
+        id="menu"
+        @click="handleMenuClicked">
+        <md-icon
+          id="ic-menu">
+          menu
+        </md-icon>
+      </div>
       <label>Rechercher</label>
-      <md-icon id="ic-search">search</md-icon>
       <template
         slot="md-autocomplete-item"
         slot-scope="{ item, term }">
@@ -33,7 +40,11 @@
 import { mapActions, mapGetters, mapMutations } from 'vuex';
 import api from '../api';
 import { debounce } from '../utils';
-import { UPDATE_SEARCH_RESULTS, SHOW_DRAWER_SEARCH_RESULTS } from '../mutation-types';
+import {
+  UPDATE_SEARCH_RESULTS,
+  SHOW_DRAWER_SEARCH_RESULTS,
+  SHOW_NAVIGATION
+} from '../mutation-types';
 
 const debouncedSearch = debounce(api.search, 800, { leading: true });
 
@@ -90,8 +101,11 @@ export default {
         });
       }
     },
+    handleMenuClicked() {
+      this.$root.$emit('show-navigation');
+    },
     ...mapActions(['expand']),
-    ...mapMutations([UPDATE_SEARCH_RESULTS, SHOW_DRAWER_SEARCH_RESULTS])
+    ...mapMutations([UPDATE_SEARCH_RESULTS, SHOW_DRAWER_SEARCH_RESULTS, SHOW_NAVIGATION])
   }
 };
 </script>
@@ -128,19 +142,20 @@ export default {
 
 #search .md-input {
   border: none;
-  padding-left: 40px !important;
+  padding-left: 50px !important;
 }
 
 #search label {
   color: $silver;
-  left: 40px !important;
+  left: 50px !important;
 }
 
-#ic-search {
+#menu {
   position: absolute;
-  left: 5px;
-  top: 8px;
+  left: 8px;
+  top: 12px;
   color: $silver;
+  cursor: pointer;
 }
 
 .md-menu-content {
