@@ -9,7 +9,7 @@
       </div>
       <div>Code postal: {{ code_postal }} {{ pays_code }}</div>
       <div>ID n° {{ numero_piece_identite }}</div>
-      <div>{{ degree > 1 ? liens : lien }} liens</div>
+      <div>{{ degree }} {{ degree > 1 ? 'liens' : 'lien' }} </div>
     </div>
   </div>
 </template>

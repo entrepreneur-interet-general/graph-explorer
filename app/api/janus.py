@@ -135,9 +135,22 @@ class JanusProxy():
             traversal = traversal.property('degree', __.both().dedup().count())
             # select attributes
             traversal = traversal \
-                .project('entity', 'prenom_nom', 'degree') \
+                .project(
+                    'entity',
+                    'prenom_nom',
+                    'prenom',
+                    'nom',
+                    'code_postal',
+                    'pays_code',
+                    'numero_piece_identite',
+                    'degree') \
                 .by('entity') \
                 .by('prenomnom') \
+                .by('prenom') \
+                .by('nom') \
+                .by('code_postal') \
+                .by('pays_code') \
+                .by('numero_piece_identite') \
                 .by('degree')
             search_results.extend(traversal.toList())
         return search_results

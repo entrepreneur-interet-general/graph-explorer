@@ -56,3 +56,9 @@ class JanusTestCase(TestCase):
             search_result = search_results[0]
             self.assertIn('entity', search_result)
             self.assertIn('prenom_nom', search_result)
+            self.assertIn('prenom', search_result)
+            self.assertIn('nom', search_result)
+            self.assertIn('code_postal', search_result)
+            self.assertIn('pays_code', search_result)
+            self.assertIn('numero_piece_identite', search_result)
+            self.assertIn('degree', search_result)

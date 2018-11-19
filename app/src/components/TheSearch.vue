@@ -1,7 +1,7 @@
 <template>
   <div
     id="search-container"
-    @:keyup.enter="handleSubmit">
+    @keyup.enter="handleSubmit">
     <md-autocomplete
       id="search"
       v-model="value"
