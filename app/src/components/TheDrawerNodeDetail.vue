@@ -14,11 +14,17 @@
         </span>
       </div>
     </div>
+    <md-button
+      class="md-small table-cell"
+      @click="SHOW_MODAL">
+      DÉTAIL
+    </md-button>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapMutations } from 'vuex';
+import { SHOW_MODAL } from '../mutation-types';
 
 export default {
   computed: {
@@ -31,6 +37,9 @@ export default {
       const m = parseInt(this.focusNode.out_degree_weighted, 10);
       return m.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
     }
+  },
+  methods: {
+    ...mapMutations([SHOW_MODAL])
   }
 };
 </script>

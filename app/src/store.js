@@ -9,7 +9,9 @@ import {
   HIDE_PROGRESS_SPINNER,
   SHOW_DRAWER_SEARCH_RESULTS,
   HIDE_DRAWER_SEARCH_RESULTS,
-  UPDATE_SEARCH_RESULTS
+  UPDATE_SEARCH_RESULTS,
+  SHOW_MODAL,
+  HIDE_MODAL
 } from './mutation-types';
 import api from './api';
 
@@ -25,7 +27,8 @@ export default new Vuex.Store({
     searchResults: [],
     G: new jsnx.MultiDiGraph(),
     showProgressSpinner: false,
-    showDrawerSearchResults: false
+    showDrawerSearchResults: false,
+    showModal: false
   },
   getters: {
     nodes(state) {
@@ -101,6 +104,12 @@ export default new Vuex.Store({
         state.showDrawerSearchResults = false;
       }
       state.searchResults = payload;
+    },
+    [SHOW_MODAL](state) {
+      state.showModal = true;
+    },
+    [HIDE_MODAL](state) {
+      state.showModal = false;
     }
   },
   actions: {

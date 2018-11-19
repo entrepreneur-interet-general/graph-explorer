@@ -67,5 +67,6 @@ export default {
   width: 150px;
   border-radius: 0;
   border: solid 1px;
+  z-index: 1;
 }
 </style>

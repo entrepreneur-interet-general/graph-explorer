@@ -6,6 +6,9 @@
     <the-zoom-widget v-if="showGraphWidgets"/>
     <the-button-download v-if="showGraphWidgets"/>
     <the-progress-spinner v-show="showProgressSpinner"/>
+    <the-modal v-if="showModal">
+      <the-transactions-table/>
+    </the-modal>
   </div>
 </template>
 
@@ -17,7 +20,8 @@ import TheGraph from './TheGraph.vue';
 import TheZoomWidget from './TheZoomWidget.vue';
 import TheButtonDownload from './TheButtonDownload.vue';
 import TheProgressSpinner from './TheProgressSpinner.vue';
-
+import TheModal from './TheModal.vue';
+import TheTransactionsTable from './TheTransactionsTable.vue';
 
 export default {
   name: 'App',
@@ -27,7 +31,9 @@ export default {
     TheGraph,
     TheZoomWidget,
     TheButtonDownload,
-    TheProgressSpinner
+    TheProgressSpinner,
+    TheModal,
+    TheTransactionsTable
   },
   computed: {
     filter() {

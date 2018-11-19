@@ -59,11 +59,11 @@ export default {
     });
   },
   methods: {
-    handleChange(text) {
-      if (text === '') {
+    handleChange(prenomNom) {
+      if (prenomNom === '') {
         this.UPDATE_SEARCH_RESULTS([]);
       }
-      const options = { params: { text } };
+      const options = { params: { prenom_nom: prenomNom } };
       this.people = debouncedSearch(options);
     },
     handleSelected(person) {
@@ -78,7 +78,7 @@ export default {
       // remove focus from the search bar
       document.activeElement.blur();
       if (vm.value !== '') {
-        const options = { params: { search_term: vm.value } };
+        const options = { params: { prenom_nom: vm.value } };
         api.search(options).then((results) => {
           if (results.length === 1) {
             const { entity } = results[0];

@@ -56,39 +56,39 @@ Data directories for Elasticsearch and ScyllaDB will be mounted in the `PROJECT_
 The different services in the `docker-compose` setup need to be started in a specific order. [`wait-for-it.sh`](https://github.com/vishnubob/wait-for-it) mechanisms (or alike) could be implemented in the future to allow running all the services in a one line command like `docker-compose --build up`.
 
 #### Steps
-* Clone the repository
+1. Clone the repository
 ```
 > git clone  git@github.com:entrepreneur-interet-general/graph-explorer.git
 > cd graph-explorer
 ```
-* Download and build Docker images
+2. Download and build Docker images
 ```
 > docker-compose build
 ```
-* Create data directories
+3. Create data directories
 ```
 mkdir -p data/elasticsearch data/scylla
 ```
-* Start Elasticsearch
+4. Start Elasticsearch
 ```
 > docker-compose up -d elasticsearch
 ```
-* Wait for Elasticsearch to be available on port `9200`
+5. Wait for Elasticsearch to be available on port `9200`
 ```
 > curl localhost:9200/_cat/health
 docker-cluster yellow 1 1 6 6 0 0 6 0 - 50.0%
 ```
-* Start ScyllaDB
+6. Start ScyllaDB
 ```
 > docker-compose up -d scylladb
 ```
-* Wait for ScyllaDB to be available
+7. Wait for ScyllaDB to be available
 ```
 > docker-compose exec scylladb nodetool status
 --  Address     Load       Tokens       Owns    Host ID                               Rack
 UN  172.22.0.3  1.07 MB    256          ?       c961595a-ee52-4f94-baf3-74cdc5058af6  rack1
 ```
-* Start JanusGraph
+8. Start JanusGraph
 ```
 > docker-compose up -d janus
 ```
@@ -100,17 +100,17 @@ In this case you can run a cleanup script and then restart the `janus` container
 ```
 > docker-compose run --no-deps janus bin/gremlin.sh -e scripts/clean.groovy
 ```
-*  Wait for JanusGraph to be available on port `8182`
+9.  Wait for JanusGraph to be available on port `8182`
 ```
 > curl -XPOST -d '{"gremlin" : "1+1" }' localhost:8182
 {"result":{"data":[2],"meta":{}}}
 ```
-* Create the graph schema and load nodes and edges into JanusGraph (do it only the first time or after deleting the data directory)
+10. Create the graph schema and load nodes and edges into JanusGraph (do it only the first time or after deleting the data directory)
 ```
 > docker-compose exec janus bin/gremlin.sh -e scripts/create_schema.groovy
 > docker-compose exec janus bin/gremlin.sh -e scripts/load_data.groovy
 ```
-* Checks that nodes and edges have been loaded
+11. Checks that nodes and edges have been loaded
 ```
 > curl -XPOST -d '{"gremlin" : "g.V().count()" }' localhost:8182
 {"result":{"data":[1606],"meta":{}}}
@@ -118,22 +118,35 @@ In this case you can run a cleanup script and then restart the `janus` container
 > curl -XPOST -d '{"gremlin" : "g.E().count()" }' localhost:8182
 {"result":{"data":[2156],"meta":{}}}
 ```
-* Load raw transactions into Elasticsearch (do it only the first time or after deleting the data directoy)
+12. Load raw transactions into Elasticsearch (do it only the first time or after deleting the data directoy)
 ```
 > docker-compose up -d logstash
 ```
-* Check that transactions have been loaded in the `transactions` index
+13. Check that transactions have been loaded in the `transactions` index
 ```
 > curl localhost:9200/transactions/doc/_count
 {"count":2156,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0}}
 ```
-* Start the Flask server with Gunicorn
+14. Start the Flask server with Gunicorn
 ```
 docker-compose up -d app
 ```
 * Visit [http://localhost:5000](http://localhost:5000)
 
 ## Development
+
+### Run the tests
+
+* Unit tests
+```
+make test_unit
+```
+
+* Integration tests requiring ScyllaDB, Elasticsearch and Janus to be up and running with data
+loaded from steps 10 and 12
+```
+make test_integration
+```
 
 ### Flask server
 * Start `Elasticsearch`, `ScyllaDB` and `JanusGraph` with `docker-compose ` as described in the installation steps.
@@ -144,7 +157,7 @@ pip install -r requirements.txt
 ```
 * Run `Flask` in development mode. This will reload the server on code changes.
 ```
-FLASK_APP=app.py FLASK_ENV='development' python -m flask run
+FLASK_APP=api.app.py FLASK_ENV='development' CONFIG='api.config.Development' python -m flask run
 ```
 
 ### Frontend
