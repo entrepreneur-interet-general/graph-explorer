@@ -1,31 +1,65 @@
 <template>
-  <div class="search-result-list-item" @click="handleClick">
+  <div
+    class="search-result-list-item"
+    @click="handleClick">
     <div class="search-result-list-item-content">
       <div>
-        <span>{{prenom}} {{nom}} #{{entity}}</span> 
+        <span>{{ prenom }} {{ nom }} #{{ entity }}</span>
         <md-icon v-if="star">star</md-icon>
       </div>
-      <div>Code postal: {{code_postal}} {{pays_code}}</div>
-      <div>ID n° {{numero_piece_identite}}</div>
-      <div v-if="degree > 1">{{degree}} liens</div>
-      <div v-else>{{degree}} lien</div>
+      <div>Code postal: {{ code_postal }} {{ pays_code }}</div>
+      <div>ID n° {{ numero_piece_identite }}</div>
+      <div>{{ degree > 1 ? liens : lien }} liens</div>
     </div>
   </div>
 </template>
 
 <script>
 
-import { mapActions, mapMutations } from 'vuex';
+import { mapActions } from 'vuex';
 
 export default {
-  props: ['prenom', 'nom', 'entity', 'code_postal', 'pays_code', 'numero_piece_identite', 'star', 'degree'],
+  props: {
+    prenom: {
+      type: String,
+      default: ''
+    },
+    nom: {
+      type: String,
+      default: ''
+    },
+    entity: {
+      type: String,
+      default: ''
+    },
+    code_postal: {
+      type: String,
+      default: ''
+    },
+    pays_code: {
+      type: String,
+      default: ''
+    },
+    numero_piece_identite: {
+      type: String,
+      default: ''
+    },
+    star: {
+      type: String,
+      default: ''
+    },
+    degree: {
+      type: String,
+      default: ''
+    }
+  },
   methods: {
-    handleClick(){
+    handleClick() {
       this.expand(this.entity);
     },
     ...mapActions(['expand'])
   }
-}
+};
 </script>
 
 <style lang="scss">
@@ -34,7 +68,7 @@ export default {
 
   .search-result-list-item:first-of-type {
     border-top: 1px solid $clouds;
-  } 
+  }
 
   .search-result-list-item {
 
@@ -52,7 +86,7 @@ export default {
     }
 
     .md-button {
-     border: solid 1px black; 
+     border: solid 1px black;
     }
   }
 
@@ -67,6 +101,6 @@ export default {
 
   .search-result-list-item-content div:first-child {
     font-weight: bold;
-  } 
+  }
 
 </style>

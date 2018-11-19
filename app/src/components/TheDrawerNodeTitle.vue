@@ -1,8 +1,8 @@
 <template>
-  <div id="drawer-title">
-    <div id="drawer-title-content" class="md-title">
-      {{focusNode.prenom_nom}} {{`#${focusNode.entity}`}}
-    </div>
+  <div
+    id="drawer-title"
+    class="md-title">
+    {{ focusNode.prenom_nom }} #{{ focusNode.entity }}
   </div>
 </template>
 
@@ -13,22 +13,16 @@ export default {
   computed: {
     ...mapGetters(['focusNode'])
   }
-
-}
+};
 </script>
 
-<style lang="scss">
-
+<style scoped lang="scss">
 @import "../scss/settings.scss";
 
 #drawer-title {
   margin-top: 110px;
   background-color: $peter-river;
   color: white;
-  min-width: 0;
-}
-
-#drawer-title-content {
   padding-left: 16px;
   padding-right: 16px;
   padding-top: 20px;
@@ -36,4 +30,3 @@ export default {
 }
 
 </style>
-

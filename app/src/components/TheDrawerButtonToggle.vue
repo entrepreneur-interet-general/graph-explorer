@@ -1,37 +1,29 @@
 <template>
-  <button id="drawer-toggle-button" v-bind:style="toggleButtonStyle" @click="handleClick">
-    <div class="caret" v-bind:style="caretStyle"></div>
+  <button
+    id="drawer-toggle-button"
+    :class="[expanded ? 'expanded' : 'collapsed']"
+    @click="handleClick">
+    <div class="caret"/>
   </button>
 </template>
 
 <script>
 export default {
   props: {
-    expanded: Boolean
-  },
-  computed: {
-    toggleButtonStyle() {
-      return {
-        'left': this.expanded ? "380px": "0px"
-      }
-    },
-    caretStyle() {
-      return {
-        'border-right': this.expanded ? "5px solid black" : "none",
-        'border-left': this.expanded ? "none" : "5px solid black"
-      }
+    expanded: {
+      default: true,
+      type: Boolean
     }
   },
   methods: {
-    handleClick(){
-      this.$emit("click");
+    handleClick() {
+      this.$emit('toggleDrawer');
     }
   }
-}
+};
 </script>
 
 <style lang="scss">
-
 @import "../scss/settings.scss";
 
 #drawer-toggle-button {
@@ -46,10 +38,10 @@ export default {
   text-align: center;
 
   .caret {
-    width: 0; 
-    height: 0; 
+    width: 0;
+    height: 0;
     border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent; 
+    border-bottom: 5px solid transparent;
     -webkit-transition: border-left 200ms; /* Safari */
     transition: border-left 200ms;
     -webkit-transition: border-right 200ms; /* Safari */
@@ -62,5 +54,19 @@ export default {
   cursor: pointer;
 }
 
-</style>
+.expanded {
+  left: 380px;
+  .caret {
+    border-right: 5px solid black;
+    border-left: none;
+  }
+}
 
+.collapsed {
+  left: 0px;
+  .caret {
+    border-right: none;
+    border-left: 5px solid black;
+  }
+}
+</style>

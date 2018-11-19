@@ -1,47 +1,49 @@
 <template>
   <div id="app">
-    <search></search>
-    <!-- <filter-list></filter-list> -->
-    <drawer v-if="showDrawer">
-      <drawer-search-results v-if="showDrawerSearchResults"></drawer-search-results>
-      <drawer-node-info v-else-if="showDrawerNodeInfo"></drawer-node-info>
-    </drawer>
-    <graph></graph>
-    <zoom-widget v-if="showGraphWidgets"></zoom-widget>
-    <the-button-download v-if="showGraphWidgets"></the-button-download>
-    <progress-spinner v-show="showProgressSpinner"></progress-spinner>
+    <the-search/>
+    <the-drawer v-if="showDrawer"/>
+    <the-graph/>
+    <the-zoom-widget v-if="showGraphWidgets"/>
+    <the-button-download v-if="showGraphWidgets"/>
+    <the-progress-spinner v-show="showProgressSpinner"/>
+    <the-modal v-if="showModal">
+      <the-transactions-table/>
+    </the-modal>
   </div>
 </template>
 
 <script>
-import Search from "./Search.vue";
-import FilterList from "./FilterList.vue";
-import Drawer from "./Drawer.vue";
-import DrawerNodeInfo from "./DrawerNodeInfo";
-import DrawerSearchResults from "./DrawerSearchResults";
-import Graph from "./Graph.vue";
-import ZoomWidget from "./ZoomWidget.vue";
-import TheButtonDownload from "./TheButtonDownload.vue";
-import ProgressSpinner from "./ProgressSpinner";
 import { mapActions, mapState, mapGetters } from 'vuex';
-
+import TheSearch from './TheSearch.vue';
+import TheDrawer from './TheDrawer.vue';
+import TheGraph from './TheGraph.vue';
+import TheZoomWidget from './TheZoomWidget.vue';
+import TheButtonDownload from './TheButtonDownload.vue';
+import TheProgressSpinner from './TheProgressSpinner.vue';
+import TheModal from './TheModal.vue';
+import TheTransactionsTable from './TheTransactionsTable.vue';
 
 export default {
-  name: "app",
-  components: { Search, FilterList, Drawer, Graph, ZoomWidget, TheButtonDownload, 
-    ProgressSpinner, DrawerNodeInfo, DrawerSearchResults },
+  name: 'App',
+  components: {
+    TheSearch,
+    TheDrawer,
+    TheGraph,
+    TheZoomWidget,
+    TheButtonDownload,
+    TheProgressSpinner,
+    TheModal,
+    TheTransactionsTable
+  },
   computed: {
     filter() {
       return this.$store.state.filter;
     },
-    ...mapState(["showModal", "showProgressSpinner", "showDrawerSearchResults"]),
-    ...mapGetters(["showGraphWidgets", "showDrawer", "showDrawerNodeInfo"])
+    ...mapState(['showModal', 'showProgressSpinner', 'showDrawerSearchResults']),
+    ...mapGetters(['showGraphWidgets', 'showDrawer'])
   },
   methods: {
     ...mapActions(['expand'])
-  },
-  mounted() {
-    // this.expand(19336) // 19336 = Jill Sanchez, 23709 Jasmine Calderon 
   }
 };
 </script>
