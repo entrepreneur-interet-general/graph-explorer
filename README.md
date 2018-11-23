@@ -68,6 +68,7 @@ The different services in the `docker-compose` setup need to be started in a spe
 3. Create data directories
 ```
 mkdir -p data/elasticsearch data/scylla
+chown -R 1000:1000 data/elasticsearch
 ```
 4. Start Elasticsearch
 ```
