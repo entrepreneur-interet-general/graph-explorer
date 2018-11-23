@@ -11,7 +11,9 @@ import {
   HIDE_DRAWER_SEARCH_RESULTS,
   UPDATE_SEARCH_RESULTS,
   SHOW_MODAL,
-  HIDE_MODAL
+  HIDE_MODAL,
+  SHOW_NAVIGATION,
+  HIDE_NAVIGATION
 } from './mutation-types';
 import api from './api';
 
@@ -28,7 +30,8 @@ export default new Vuex.Store({
     G: new jsnx.MultiDiGraph(),
     showProgressSpinner: false,
     showDrawerSearchResults: false,
-    showModal: false
+    showModal: false,
+    showNavigation: false
   },
   getters: {
     nodes(state) {
@@ -98,6 +101,12 @@ export default new Vuex.Store({
     },
     [HIDE_DRAWER_SEARCH_RESULTS](state) {
       state.showDrawerSearchResults = false;
+    },
+    [SHOW_NAVIGATION](state) {
+      state.showNavigation = true;
+    },
+    [HIDE_NAVIGATION](state) {
+      state.showNavigation = false;
     },
     [UPDATE_SEARCH_RESULTS](state, payload) {
       if (payload.constructor === Array && payload.length === 0) {

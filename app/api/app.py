@@ -3,7 +3,8 @@ import json
 import os
 from collections import OrderedDict
 
-from flask import Flask, request, send_from_directory, jsonify, send_file
+from flask import Flask, request, send_from_directory, jsonify, \
+    send_file, redirect
 
 from .janus import JanusClient
 from .elastic import ElasticsearchProxy
