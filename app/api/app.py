@@ -111,7 +111,7 @@ def get_transactions():
     entities = request.get_json()['data']['entities']
     transactions = es.get_transactions(entities)
     transactions = [to_ordered_dict(t) for t in transactions]
-    return json.dumps(transactions)
+    return jsonify(transactions)
 
 
 if __name__ == "__main__":
